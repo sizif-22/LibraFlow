@@ -21,10 +21,14 @@ export const authController = new Elysia({ prefix: '/auth' })
         }
     }, {
         body: t.Object({
-            email: t.String(),
-            password: t.String(),
-            name: t.String(),
-            role: t.Optional(t.String())
+            email: t.String({ format: 'email' }),
+            password: t.String({ minLength: 6 }),
+            name: t.String({ minLength: 2 }),
+            role: t.Optional(t.Enum({
+                STUDENT: 'STUDENT',
+                LIBRARIAN: 'LIBRARIAN',
+                ADMIN: 'ADMIN'
+            }))
         })
     })
     .post('/login', async ({ body, jwt, error }) => {

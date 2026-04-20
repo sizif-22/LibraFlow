@@ -14,6 +14,7 @@ export const bookController = new Elysia({ prefix: '/books' })
             limit: limit ? parseInt(limit) : 10
         })
     }, {
+        isAuth: true,
         query: t.Object({
             search: t.Optional(t.String()),
             page: t.Optional(t.String()),
@@ -24,6 +25,8 @@ export const bookController = new Elysia({ prefix: '/books' })
         const book = await BookService.getById(parseInt(id))
         if (!book) return error(404, 'Book not found')
         return book
+    }, {
+        isAuth: true
     })
     .post('/', async ({ body, error }) => {
         try {
@@ -35,11 +38,11 @@ export const bookController = new Elysia({ prefix: '/books' })
         isAuth: true,
         hasRole: ['LIBRARIAN', 'ADMIN'],
         body: t.Object({
-            title: t.String(),
-            author: t.String(),
-            isbn: t.String(),
-            category: t.String(),
-            quantity: t.Number()
+            title: t.String({ minLength: 1 }),
+            author: t.String({ minLength: 1 }),
+            isbn: t.String({ minLength: 10 }),
+            category: t.String({ minLength: 1 }),
+            quantity: t.Number({ minimum: 0 })
         })
     })
     .put('/:id', async ({ params: { id }, body, error }) => {
@@ -52,12 +55,12 @@ export const bookController = new Elysia({ prefix: '/books' })
         isAuth: true,
         hasRole: ['LIBRARIAN', 'ADMIN'],
         body: t.Partial(t.Object({
-            title: t.String(),
-            author: t.String(),
-            isbn: t.String(),
-            category: t.String(),
-            quantity: t.Number(),
-            available: t.Number()
+            title: t.String({ minLength: 1 }),
+            author: t.String({ minLength: 1 }),
+            isbn: t.String({ minLength: 10 }),
+            category: t.String({ minLength: 1 }),
+            quantity: t.Number({ minimum: 0 }),
+            available: t.Number({ minimum: 0 })
         }))
     })
     .delete('/:id', async ({ params: { id }, error }) => {
