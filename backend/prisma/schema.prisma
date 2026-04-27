@@ -7,11 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
 enum Role {
   STUDENT
   LIBRARIAN
   ADMIN
 }
+
+enum BorrowType {
+  BOOK
+  MAGAZINE
+  THESIS
+}
+
+enum BorrowStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RETURNED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
 
 model User {
   id        Int      @id @default(autoincrement())
@@ -21,6 +38,9 @@ model User {
   role      Role     @default(STUDENT)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  borrows   Borrow[]
+  fines     Fine[]
 }
 
 model Book {
@@ -31,6 +51,38 @@ model Book {
   category  String
   quantity  Int
   available Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  borrows   Borrow[]
+}
+
+model Borrow {
+  id         Int          @id @default(autoincrement())
+  student    User         @relation(fields: [studentId], references: [id])
+  studentId  Int
+  book       Book         @relation(fields: [bookId], references: [id])
+  bookId     Int
+  type       BorrowType   @default(BOOK)
+  status     BorrowStatus @default(PENDING)
+  borrowDate DateTime     @default(now())
+  dueDate    DateTime?
+  returnDate DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  fine       Fine?
+}
+
+/// Fine model — full implementation in Sprint 3
+model Fine {
+  id        Int      @id @default(autoincrement())
+  borrow    Borrow   @relation(fields: [borrowId], references: [id])
+  borrowId  Int      @unique
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId Int
+  amount    Float    @default(0)
+  isPaid    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

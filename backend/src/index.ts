@@ -3,6 +3,7 @@ import { cors } from '@elysiajs/cors'
 import { swagger } from '@elysiajs/swagger'
 import { authController } from './controllers/auth.controller'
 import { bookController } from './controllers/book.controller'
+import { borrowController } from './controllers/borrow.controller'
 
 const app = new Elysia()
     .use(cors())
@@ -14,8 +15,9 @@ const app = new Elysia()
                 description: 'University Library Management System API Documentation'
             },
             tags: [
-                { name: 'Auth', description: 'Authentication endpoints' },
-                { name: 'Books', description: 'Book management endpoints' }
+                { name: 'Auth',   description: 'Authentication endpoints' },
+                { name: 'Books',  description: 'Book management endpoints' },
+                { name: 'Borrows', description: 'Borrowing system endpoints' }
             ]
         }
     }))
@@ -24,6 +26,7 @@ const app = new Elysia()
         app
             .use(authController)
             .use(bookController)
+            .use(borrowController)
     )
     .onError(({ code, error, set }) => {
         if (code === 'NOT_FOUND') {
