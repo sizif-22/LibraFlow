@@ -14,7 +14,7 @@
 3. [Functional Requirements](#3-functional-requirements)
 4. [Non-Functional Requirements](#4-non-functional-requirements)
 5. [Use Cases](#5-use-cases)
-6. [Sprint 1 Plan](#6-sprint-1-plan)
+6. [Design Patterns](#6-design-patterns)
 7. [Definition of Done](#7-definition-of-done)
 
 ---
@@ -289,7 +289,151 @@ main
 
 ---
  
-## 6. Definition of Done (Project-wide)
+## 6. Design Patterns
+
+LibraFlow intentionally applies two Gang-of-Four design patterns to keep the borrowing and fine-calculation logic extensible, testable, and free of conditionals scattered across the codebase.
+
+---
+
+### 6.1 Factory Pattern — Borrowing Types
+
+**Sprint:** 2 (implemented)  
+**Location:** `backend/src/factories/borrow/`
+
+#### Why Factory?
+
+Different items in the library (books, magazines, theses) carry different borrowing rules — loan duration, renewability, and access restrictions. Hard-coding those rules inside the service with a chain of `if`/`switch` statements would violate the **Open/Closed Principle**: every new item type would require editing existing, already-tested code.
+
+`BorrowFactory` solves this by encapsulating item-creation logic in one place. Adding a new borrow type only requires:
+1. Creating a class that implements `IBorrowType`
+2. Registering it in `BorrowFactory.create()` — no other files change.
+
+#### Class Structure
+
+```
+backend/src/factories/borrow/
+├── IBorrowType.ts       ← interface (contract for all types)
+├── BookBorrow.ts        ← 14 days · renewable · take-home
+├── MagazineBorrow.ts    ← 7 days  · not renewable · take-home
+├── ThesisBorrow.ts      ← 3 days  · not renewable · in-library only
+└── BorrowFactory.ts     ← static factory method
+```
+
+#### Interface
+
+```typescript
+// IBorrowType.ts
+interface IBorrowType {
+  getDueDays(): number           // loan period in days
+  isRenewable(): boolean         // whether a renewal is allowed
+  getDescription(): string       // human-readable rules summary
+  calculateDueDate(from?: Date): Date  // due date from approval date
+}
+```
+
+#### Concrete Types
+
+| Type | Class | Due Days | Renewable | Notes |
+|---|---|---|---|---|
+| `BOOK` | `BookBorrow` | 14 | ✅ Yes | Standard take-home loan |
+| `MAGAZINE` | `MagazineBorrow` | 7 | ❌ No | High-demand periodical |
+| `THESIS` | `ThesisBorrow` | 3 | ❌ No | In-library reference only |
+
+#### Factory
+
+```typescript
+// BorrowFactory.ts
+class BorrowFactory {
+  static create(type: BorrowType): IBorrowType {
+    switch (type) {
+      case BorrowType.BOOK:     return new BookBorrow()
+      case BorrowType.MAGAZINE: return new MagazineBorrow()
+      case BorrowType.THESIS:   return new ThesisBorrow()
+      default: throw new Error(`Unknown borrow type: ${type}`)
+    }
+  }
+}
+```
+
+#### Usage in the Service
+
+```typescript
+// borrow.service.ts — approveBorrow()
+const borrowType = BorrowFactory.create(borrow.type as BorrowType)
+const dueDate    = borrowType.calculateDueDate()   // no conditionals here
+```
+
+---
+
+### 6.2 Strategy Pattern — Fine Calculation
+
+**Sprint:** 3 (planned)  
+**Location:** `backend/src/strategies/fines/`
+
+#### Why Strategy?
+
+Library fines are not one-size-fits-all. A librarian might apply a per-day rate for short-term items, a fixed flat fee for casual overdue books, or a price-percentage penalty for expensive reference material. Embedding these three calculation modes directly in the service would tangle unrelated logic together and make it impossible to swap strategies at runtime.
+
+The Strategy Pattern fixes this by defining a common `IFineStrategy` interface and delegating actual computation to the injected concrete strategy. `FineCalculator` (the *context*) knows nothing about the formula — it just calls `strategy.calculate()`.
+
+#### Class Structure
+
+```
+backend/src/strategies/fines/
+├── IFineStrategy.ts      ← interface (contract for all strategies)
+├── PerDayFine.ts         ← 5 EGP × overdue days
+├── FixedFine.ts          ← flat 50 EGP (triggered after 7 days late)
+├── PercentageFine.ts     ← 5% of the book's price
+└── FineCalculator.ts     ← context class; holds & executes a strategy
+```
+
+#### Interface
+
+```typescript
+// IFineStrategy.ts
+interface IFineStrategy {
+  calculate(overdueDays: number, bookPrice?: number): number
+}
+```
+
+#### Concrete Strategies
+
+| Strategy | Class | Formula | Typical Use |
+|---|---|---|---|
+| Per-Day | `PerDayFine` | `overdueDays × 5 EGP` | Short-term overdue (books, magazines) |
+| Fixed | `FixedFine` | `50 EGP flat` | Casual late return after 7-day grace |
+| Percentage | `PercentageFine` | `bookPrice × 5%` | Expensive or rare reference items |
+
+#### Context Class
+
+```typescript
+// FineCalculator.ts
+class FineCalculator {
+  constructor(private strategy: IFineStrategy) {}
+
+  setStrategy(strategy: IFineStrategy) {
+    this.strategy = strategy      // swap at runtime
+  }
+
+  calculate(overdueDays: number, bookPrice?: number): number {
+    return this.strategy.calculate(overdueDays, bookPrice)
+  }
+}
+```
+
+#### Usage in the Service (Sprint 3)
+
+```typescript
+// fine.service.ts — calculateFine()
+const strategy   = new PerDayFine()           // chosen by librarian or borrow type
+const calculator = new FineCalculator(strategy)
+const amount     = calculator.calculate(overdueDays, book.price)
+```
+
+---
+
+ 
+## 7. Definition of Done (Project-wide)
  
 A sprint is **Done** when:
 - [ ] All sprint stories are completed
