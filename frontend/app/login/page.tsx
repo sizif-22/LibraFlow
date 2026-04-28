@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -17,7 +17,9 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+// ─── Inner component — uses useSearchParams, must be inside Suspense ──────────
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -130,7 +132,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-slate-400 mt-8">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="text-primary hover:underline font-medium">
               Join LibraFlow
             </Link>
@@ -138,5 +140,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Page export — wraps LoginContent in Suspense ─────────────────────────────
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary" size={40} />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Library, LogIn, LogOut, UserPlus, BookOpen, Settings } from 'lucide-react';
+import { Library, LogIn, LogOut, UserPlus, BookOpen, Settings, BookMarked } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -25,6 +25,13 @@ export default function Navbar() {
             <BookOpen size={18} />
             Catalog
           </Link>
+
+          {user && user.role === 'STUDENT' && (
+            <Link href="/student/borrows" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+              <BookMarked size={18} />
+              My Borrows
+            </Link>
+          )}
 
           {user && (user.role === 'LIBRARIAN' || user.role === 'ADMIN') && (
             <Link href="/librarian/books" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
