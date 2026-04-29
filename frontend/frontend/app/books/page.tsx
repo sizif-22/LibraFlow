@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import BookCard from '@/components/BookCard';
 import api from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import { getMyBorrows } from '@/lib/api/borrows';
 import { Search, Loader2, BookX, Filter } from 'lucide-react';
 
 interface BookItem {
@@ -17,14 +19,20 @@ interface BookItem {
 }
 
 export default function BooksPage() {
+  const { user } = useAuth();
   const [books, setBooks] = useState<BookItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBooks, setFilteredBooks] = useState<BookItem[]>([]);
+  const [hasUnpaidFine, setHasUnpaidFine] = useState(false);
 
   useEffect(() => {
     fetchBooks();
-  }, []);
+    if (user?.role === 'STUDENT') {
+      checkFineStatus();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.role]);
 
   useEffect(() => {
     const results = books.filter(book => 
@@ -34,6 +42,16 @@ export default function BooksPage() {
     );
     setFilteredBooks(results);
   }, [searchTerm, books]);
+
+  const checkFineStatus = async () => {
+    try {
+      const borrows = await getMyBorrows();
+      const unpaid = borrows.some((b) => b.fine && !b.fine.isPaid);
+      setHasUnpaidFine(unpaid);
+    } catch {
+      // silently ignore — don't block browsing on fine-check failure
+    }
+  };
 
   const fetchBooks = async () => {
     setIsLoading(true);
@@ -87,7 +105,11 @@ export default function BooksPage() {
           ) : filteredBooks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {filteredBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  hasUnpaidFine={user?.role === 'STUDENT' ? hasUnpaidFine : false}
+                />
               ))}
             </div>
           ) : (

@@ -21,7 +21,7 @@ export default function Home() {
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-sky-500/10 text-sky-400 px-4 py-2 rounded-full text-sm font-semibold mb-8 border border-sky-500/20">
               <Zap size={16} />
-              Sprint 1 Live
+              Sprint 2 Live
             </div>
             <h1 className="text-6xl md:text-7xl font-bold text-white mb-8 tracking-tight">
               Manage Your Library with <span className="text-gradient">Precision.</span>
