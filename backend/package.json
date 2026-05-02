@@ -18,6 +18,9 @@
     "@prisma/client": "6.2.1",
     "elysia": "^1.4.28"
   },
+  "scripts": {
+    "dev": "bun --watch src/index.ts"
+  },
   "prisma": {
     "seed": "bun prisma/seed.ts"
   }
