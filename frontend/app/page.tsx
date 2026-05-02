@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, ShieldCheck, Zap, ArrowRight, Library, Users, Clock } from 'lucide-react';
+import { Zap, ArrowRight, Library, Bell, DollarSign, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
@@ -19,30 +19,30 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-6 relative">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-sky-500/10 text-sky-400 px-4 py-2 rounded-full text-sm font-semibold mb-8 border border-sky-500/20">
+            <div className="inline-flex items-center gap-2 bg-sky-500/10 text-sky-400 px-4 py-2 rounded-full text-sm font-semibold mb-8 border border-sky-500/20 animate-pulse">
               <Zap size={16} />
-              Sprint 2 Live
+              Sprint 3 Live: Fines & Admin Intelligence
             </div>
-            <h1 className="text-6xl md:text-7xl font-bold text-white mb-8 tracking-tight">
-              Manage Your Library with <span className="text-gradient">Precision.</span>
+            <h1 className="text-6xl md:text-7xl font-black text-white mb-8 tracking-tight">
+              Modern Library <span className="text-primary">Intelligence.</span>
             </h1>
             <p className="text-xl text-slate-400 mb-12 leading-relaxed">
-              LibraFlow is the modern university solution for book cataloging, 
-              automated borrowing tracking, and seamless inventory management.
+              Automated fine calculations, real-time student notifications, 
+              and powerful administrative analytics in one beautiful workspace.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href={user ? "/books" : "/register"}
+                href={user ? (user.role === 'ADMIN' ? "/admin/dashboard" : "/books") : "/register"}
                 className="w-full sm:w-auto bg-primary hover:bg-sky-400 text-primary-foreground px-10 py-5 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2 group"
               >
-                {user ? 'Go to Catalog' : 'Get Started'}
+                {user ? (user.role === 'ADMIN' ? 'Admin Dashboard' : 'Explore Catalog') : 'Get Started'}
                 <ArrowRight className="group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/books"
                 className="w-full sm:w-auto bg-white/5 hover:bg-white/10 text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all border border-white/10 flex items-center justify-center gap-2"
               >
-                View Books
+                Browse Books
               </Link>
             </div>
           </div>
@@ -52,37 +52,48 @@ export default function Home() {
       {/* Features Grid */}
       <section className="py-24 px-6 border-t border-white/5 bg-slate-900/30">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all">
-              <div className="bg-sky-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-sky-500/30">
-                <Library className="text-sky-400" size={28} />
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
+              <div className="bg-sky-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-sky-500/30 group-hover:scale-110 transition-transform">
+                <Bell className="text-sky-400" size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Smart Catalog</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Advanced search and categorization makes finding resources across multiple 
-                departments faster than ever.
+              <h3 className="text-xl font-bold text-white mb-3">Live Alerts</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Stay informed with instant in-app notifications for approvals, 
+                rejections, and upcoming due dates.
               </p>
             </div>
 
-            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all">
-              <div className="bg-blue-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/30">
-                <Clock className="text-blue-400" size={28} />
+            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
+              <div className="bg-amber-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-amber-500/30 group-hover:scale-110 transition-transform">
+                <DollarSign className="text-amber-400" size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Real-time Tracking</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Instant availability updates when books are borrowed or returned, 
-                ensuring your catalog is always accurate.
+              <h3 className="text-xl font-bold text-white mb-3">Fair Fines</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Automated fine calculation using pluggable strategies 
+                ensuring fair and transparent late fees.
               </p>
             </div>
 
-            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all">
-              <div className="bg-indigo-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30">
-                <ShieldCheck className="text-indigo-400" size={28} />
+            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
+              <div className="bg-indigo-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30 group-hover:scale-110 transition-transform">
+                <BarChart3 className="text-indigo-400" size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Role Control</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Granular permissions for Students, Librarians, and Admins to keep 
-                sensitive library operations secure.
+              <h3 className="text-xl font-bold text-white mb-3">Admin Intelligence</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Comprehensive dashboards for admins to track system health, 
+                user roles, and overdue trends.
+              </p>
+            </div>
+
+            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
+              <div className="bg-emerald-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/30 group-hover:scale-110 transition-transform">
+                <Library className="text-emerald-400" size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Unified Catalog</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Centralized access to books, magazines, and theses 
+                with high-speed digital workflows.
               </p>
             </div>
           </div>
@@ -96,24 +107,25 @@ export default function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative">
             <div className="text-center">
-              <div className="text-5xl font-bold text-white mb-2">12k+</div>
-              <div className="text-slate-500 font-medium">Curated Books</div>
+              <div className="text-5xl font-black text-white mb-2">31</div>
+              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">User Stories</div>
             </div>
             <div className="text-center">
-              <div className="text-5xl font-bold text-gradient mb-2">99%</div>
-              <div className="text-slate-500 font-medium">Uptime Reliable</div>
+              <div className="text-5xl font-black text-primary mb-2">0</div>
+              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">Manual Paperwork</div>
             </div>
             <div className="text-center">
-              <div className="text-5xl font-bold text-white mb-2">4.8k</div>
-              <div className="text-slate-500 font-medium">Active Students</div>
+              <div className="text-5xl font-black text-white mb-2">100%</div>
+              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">Digital Returns</div>
             </div>
             <div className="text-center">
-              <div className="text-5xl font-bold text-gradient mb-2">100%</div>
-              <div className="text-slate-500 font-medium">Digital Workflow</div>
+              <div className="text-5xl font-black text-primary mb-2">S3</div>
+              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">Milestone Reached</div>
             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
