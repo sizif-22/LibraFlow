@@ -52,11 +52,12 @@ const BORROW_OPTIONS = [
 ] as const;
 
 export default function BorrowModal({ book, onClose, onSuccess }: BorrowModalProps) {
-  const [selectedType, setSelectedType] = useState<BorrowType>(BorrowType.BOOK);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selected = BORROW_OPTIONS.find((o) => o.type === selectedType)!;
+  // Find the matching option based on the book's type
+  const option = BORROW_OPTIONS.find((o) => o.type === book.type) || BORROW_OPTIONS[0];
+  const Icon = option.icon;
 
   const getDueDate = (days: number) => {
     const d = new Date();
@@ -68,7 +69,7 @@ export default function BorrowModal({ book, onClose, onSuccess }: BorrowModalPro
     setIsSubmitting(true);
     setError(null);
     try {
-      await requestBorrow({ bookId: book.id, type: selectedType });
+      await requestBorrow({ bookId: book.id });
       onSuccess();
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to submit borrow request. Please try again.');
@@ -99,63 +100,54 @@ export default function BorrowModal({ book, onClose, onSuccess }: BorrowModalPro
             <X size={20} />
           </button>
           <h2 className="text-xl font-bold text-white mb-1">Request to Borrow</h2>
-          <p className="text-slate-400 text-sm line-clamp-1">
-            <span className="text-white font-medium">{book.title}</span>
-            <span className="mx-2 text-slate-600">·</span>
-            {book.author}
-          </p>
+          <div className="flex items-center gap-3 mt-2">
+             <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${option.border} ${option.iconColor} bg-white/5`}>
+               {option.label}
+             </div>
+             <p className="text-slate-400 text-sm line-clamp-1">
+               <span className="text-white font-medium">{book.title}</span>
+               <span className="mx-2 text-slate-600">·</span>
+               {book.author}
+             </p>
+          </div>
         </div>
 
         {/* Body */}
-        <div className="px-8 py-6 space-y-5">
-          <p className="text-sm text-slate-400 font-medium">Select borrow type:</p>
-
-          {/* Type selector cards */}
-          <div className="space-y-3">
-            {BORROW_OPTIONS.map((option) => {
-              const Icon = option.icon;
-              const isSelected = selectedType === option.type;
-              return (
-                <button
-                  key={option.type}
-                  onClick={() => setSelectedType(option.type)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left
-                    ${isSelected
-                      ? `bg-gradient-to-r ${option.gradient} ${option.border} shadow-lg`
-                      : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/10'
-                    }`}
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
-                    ${isSelected ? `bg-gradient-to-br ${option.gradient} border ${option.border}` : 'bg-white/5 border border-white/10'}`}
-                  >
-                    <Icon size={20} className={isSelected ? option.iconColor : 'text-slate-500'} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`font-semibold ${isSelected ? 'text-white' : 'text-slate-300'}`}>
-                      {option.label}
-                    </div>
-                    <div className={`text-xs mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                      {option.description}
-                    </div>
-                  </div>
-                  <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full
-                    ${isSelected ? `${option.iconColor} bg-white/10` : 'text-slate-600 bg-white/5'}`}
-                  >
-                    <Calendar size={12} />
-                    {option.days}d
-                  </div>
-                </button>
-              );
-            })}
+        <div className="px-8 py-8 space-y-6">
+          
+          {/* Item Info Card */}
+          <div className={`w-full flex items-center gap-4 p-5 rounded-2xl border bg-gradient-to-r ${option.gradient} ${option.border} shadow-lg`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${option.gradient} border ${option.border}`}>
+              <Icon size={24} className={option.iconColor} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-white text-lg">
+                {option.label} Loan
+              </div>
+              <div className="text-sm text-slate-300">
+                {option.description}
+              </div>
+            </div>
+            <div className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${option.iconColor} bg-white/10`}>
+              <Calendar size={14} />
+              {option.days} Days
+            </div>
           </div>
 
-          {/* Due date preview */}
-          <div className="flex items-center gap-3 bg-white/[0.04] border border-white/5 rounded-2xl p-4">
-            <Calendar size={18} className="text-slate-500 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-slate-500 mb-0.5">Estimated due date (if approved)</p>
-              <p className="text-white font-medium text-sm">{getDueDate(selected.days)}</p>
-            </div>
+          {/* Details & Rules */}
+          <div className="space-y-3">
+             <div className="flex items-center justify-between text-sm py-2 border-b border-white/5">
+                <span className="text-slate-500">Loan Duration</span>
+                <span className="text-white font-medium">{option.days} Days</span>
+             </div>
+             <div className="flex items-center justify-between text-sm py-2 border-b border-white/5">
+                <span className="text-slate-500">Estimated Due Date</span>
+                <span className="text-primary font-bold">{getDueDate(option.days)}</span>
+             </div>
+             <div className="flex items-center justify-between text-sm py-2">
+                <span className="text-slate-500">Late Fee Policy</span>
+                <span className="text-amber-400 font-medium">Standard Daily Fine</span>
+             </div>
           </div>
 
           {/* Error */}
@@ -186,7 +178,7 @@ export default function BorrowModal({ book, onClose, onSuccess }: BorrowModalPro
                 Submitting...
               </>
             ) : (
-              'Submit Request'
+              'Confirm Request'
             )}
           </button>
         </div>

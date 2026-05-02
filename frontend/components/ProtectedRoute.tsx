@@ -5,15 +5,31 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { token, isLoading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: ('STUDENT' | 'LIBRARIAN' | 'ADMIN')[];
+}
+
+export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+  const { token, user, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !token) {
-      router.push('/login');
+    if (!isLoading) {
+      if (!token) {
+        router.push('/login');
+      } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        // Redirect based on role if not authorized
+        if (user.role === 'ADMIN') {
+          router.push('/admin/dashboard');
+        } else if (user.role === 'LIBRARIAN') {
+          router.push('/librarian/dashboard');
+        } else {
+          router.push('/');
+        }
+      }
     }
-  }, [token, isLoading, router]);
+  }, [token, user, isLoading, router, allowedRoles]);
 
   if (isLoading) {
     return (
@@ -25,6 +41,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!token) return null;
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) return null;
 
   return <>{children}</>;
 }

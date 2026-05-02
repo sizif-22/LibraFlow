@@ -21,20 +21,32 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-6">
-          <Link href="/books" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
-            <BookOpen size={18} />
-            Catalog
-          </Link>
+          {(!user || user.role === 'STUDENT') && (
+            <Link href="/books" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+              <BookOpen size={18} />
+              Catalog
+            </Link>
+          )}
 
           {user && user.role === 'STUDENT' && (
-            <Link href="/student/borrows" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
-              <BookMarked size={18} />
-              My Borrows
-            </Link>
+            <>
+              <Link href="/student/dashboard" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                <LayoutDashboard size={18} />
+                Dashboard
+              </Link>
+              <Link href="/student/borrows" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                <BookMarked size={18} />
+                My Borrows
+              </Link>
+            </>
           )}
 
           {user && (user.role === 'LIBRARIAN' || user.role === 'ADMIN') && (
             <>
+              <Link href={user.role === 'ADMIN' ? "/admin/dashboard" : "/librarian/dashboard"} className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                <LayoutDashboard size={18} />
+                Dashboard
+              </Link>
               <Link href="/librarian/books" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
                 <Settings size={18} />
                 Manage
@@ -54,14 +66,8 @@ export default function Navbar() {
             </>
           )}
 
-          {user && user.role === 'ADMIN' && (
-            <Link href="/admin/dashboard" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
-              <LayoutDashboard size={18} />
-              Dashboard
-            </Link>
-          )}
-
           <div className="h-6 w-px bg-white/10 mx-2" />
+
 
           {user ? (
             <div className="flex items-center gap-4">

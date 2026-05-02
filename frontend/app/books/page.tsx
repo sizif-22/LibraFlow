@@ -14,33 +14,39 @@ interface BookItem {
   author: string;
   isbn: string;
   category: string;
+  type: string;
   quantity: number;
   available: number;
 }
 
 export default function BooksPage() {
-  const { user } = useAuth();
+  const { token, user } = useAuth();
   const [books, setBooks] = useState<BookItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBooks, setFilteredBooks] = useState<BookItem[]>([]);
   const [hasUnpaidFine, setHasUnpaidFine] = useState(false);
 
+
   useEffect(() => {
+    if (!token) return;
     fetchBooks();
     if (user?.role === 'STUDENT') {
       checkFineStatus();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.role]);
+  }, [user?.role, token]);
+
 
   useEffect(() => {
-    const results = books.filter(book => 
-      book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredBooks(results);
+    if (Array.isArray(books)) {
+      const results = books.filter(book => 
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredBooks(results);
+    }
   }, [searchTerm, books]);
 
   const checkFineStatus = async () => {
@@ -57,17 +63,21 @@ export default function BooksPage() {
     setIsLoading(true);
     try {
       const response = await api.get('/books');
-      setBooks(response.data);
-      setFilteredBooks(response.data);
-    } catch (err) {
-      console.error('Failed to fetch books:', err);
+      const bookData = response.data.books || response.data;
+      setBooks(bookData);
+      setFilteredBooks(bookData);
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch books:', err);
+      }
     } finally {
+
       setIsLoading(false);
     }
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['STUDENT']}>
       <div className="min-h-screen bg-slate-950 px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <header className="mb-12 text-center">

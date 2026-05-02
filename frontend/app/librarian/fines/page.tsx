@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+
 import RoleGuard from '@/components/RoleGuard';
 import { finesApi } from '@/lib/api/fines';
 import { Fine } from '@/lib/types/fine';
@@ -20,18 +22,26 @@ export default function LibrarianFinesPage() {
   const [selectedFine, setSelectedFine] = useState<Fine | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const { token } = useAuth();
+
   useEffect(() => {
-    fetchFines();
-  }, []);
+    if (token) {
+      fetchFines();
+    }
+  }, [token]);
+
 
   const fetchFines = async () => {
     setIsLoading(true);
     try {
       const data = await finesApi.getAllFines();
       setFines(data);
-    } catch (err) {
-      console.error('Failed to fetch fines:', err);
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch fines:', err);
+      }
     } finally {
+
       setIsLoading(false);
     }
   };

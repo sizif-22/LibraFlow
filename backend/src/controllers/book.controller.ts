@@ -1,12 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { BookService } from '../services/book.service'
-import { authMiddleware } from '../middlewares/auth.middleware'
-import { roleMiddleware } from '../middlewares/role.middleware'
 
 export const bookController = new Elysia({ prefix: '/books' })
-    .use(authMiddleware)
-    .use(roleMiddleware)
-    .get('/', async ({ query }) => {
+    .get('/', async ({ query }: any) => {
         const { search, page, limit } = query
         return await BookService.getAll({
             search,
@@ -21,19 +17,25 @@ export const bookController = new Elysia({ prefix: '/books' })
             limit: t.Optional(t.String())
         })
     })
-    .get('/:id', async ({ params: { id }, error }) => {
+    .get('/:id', async ({ params: { id }, set }: any) => {
         const book = await BookService.getById(parseInt(id))
-        if (!book) return error(404, 'Book not found')
+        if (!book) {
+            set.status = 404
+            return { message: 'Book not found' }
+        }
         return book
+
     }, {
         isAuth: true
     })
-    .post('/', async ({ body, error }) => {
+    .post('/', async ({ body, set }: any) => {
         try {
             return await BookService.create(body)
         } catch (e: any) {
-            return error(400, e.message || 'Failed to create book')
+            set.status = 400
+            return { message: e.message || 'Failed to create book' }
         }
+
     }, {
         isAuth: true,
         hasRole: ['LIBRARIAN', 'ADMIN'],
@@ -45,12 +47,14 @@ export const bookController = new Elysia({ prefix: '/books' })
             quantity: t.Number({ minimum: 0 })
         })
     })
-    .put('/:id', async ({ params: { id }, body, error }) => {
+    .put('/:id', async ({ params: { id }, body, set }: any) => {
         try {
             return await BookService.update(parseInt(id), body)
         } catch (e: any) {
-            return error(400, e.message || 'Failed to update book')
+            set.status = 400
+            return { message: e.message || 'Failed to update book' }
         }
+
     }, {
         isAuth: true,
         hasRole: ['LIBRARIAN', 'ADMIN'],
@@ -63,13 +67,15 @@ export const bookController = new Elysia({ prefix: '/books' })
             available: t.Number({ minimum: 0 })
         }))
     })
-    .delete('/:id', async ({ params: { id }, error }) => {
+    .delete('/:id', async ({ params: { id }, set }: any) => {
         try {
             await BookService.delete(parseInt(id))
             return { message: 'Book deleted successfully' }
         } catch (e: any) {
-            return error(400, e.message || 'Failed to delete book')
+            set.status = 400
+            return { message: e.message || 'Failed to delete book' }
         }
+
     }, {
         isAuth: true,
         hasRole: ['LIBRARIAN', 'ADMIN']

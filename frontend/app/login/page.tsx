@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import api from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
+import api, { ApiError } from '@/lib/api';
+import { useAuth, User } from '@/context/AuthContext';
+
 import { LogIn, Mail, Lock, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -45,13 +46,15 @@ function LoginContent() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await api.post('/auth/login', data);
+      const response = await api.post<{ token: string; user: User }>('/auth/login', data);
       const { token, user } = response.data;
       login(token, user);
       router.push('/books');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      setError((apiError.response?.data as { message?: string })?.message || 'Login failed. Please check your credentials.');
     } finally {
+
       setIsLoading(false);
     }
   };

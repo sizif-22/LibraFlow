@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+
 import ProtectedRoute from '@/components/ProtectedRoute';
 import RoleGuard from '@/components/RoleGuard';
 import { adminApi } from '@/lib/api/admin';
@@ -21,9 +23,14 @@ export default function AdminDashboard() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
+  const { token } = useAuth();
+
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
+
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -38,9 +45,12 @@ export default function AdminDashboard() {
       setTopBooks(tb);
       setOverdueBorrows(ob);
       setFineReport(fr);
-    } catch (err) {
-      console.error('Failed to fetch admin data:', err);
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch admin data:', err);
+      }
     } finally {
+
       setIsLoading(false);
     }
   };

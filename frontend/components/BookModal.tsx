@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { X, Loader2, Save } from 'lucide-react';
-import api from '@/lib/api';
+import api, { ApiError } from '@/lib/api';
+
 
 const bookSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -90,10 +91,11 @@ export default function BookModal({ isOpen, onClose, onSuccess, book }: BookModa
       }
       onSuccess();
       onClose();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save book. Please try again.');
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      setError((apiError.response?.data as { message?: string })?.message || 'Failed to save book. Please try again.');
     } finally {
+
       setIsLoading(false);
     }
   };

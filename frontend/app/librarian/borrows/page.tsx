@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+
 import RoleGuard from '@/components/RoleGuard';
 import {
   getPendingBorrows,
@@ -174,16 +176,24 @@ export default function LibrarianBorrowsPage() {
     try {
       const data = await getPendingBorrows();
       setBorrows(data);
-    } catch (err) {
-      console.error('Failed to fetch pending borrows:', err);
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch pending borrows:', err);
+      }
     } finally {
+
       setIsLoading(false);
     }
   }, []);
 
+  const { token } = useAuth();
+
   useEffect(() => {
-    fetchPending();
-  }, [fetchPending]);
+    if (token) {
+      fetchPending();
+    }
+  }, [fetchPending, token]);
+
 
   const handleApprove = async (id: number) => {
     setActingId(id);

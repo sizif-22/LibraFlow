@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { getMyBorrows } from '@/lib/api/borrows';
 import { Borrow, BorrowStatus } from '@/lib/types/borrow';
@@ -127,22 +129,30 @@ export default function StudentBorrowsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('active');
 
+  const { token } = useAuth();
+
   useEffect(() => {
-    (async () => {
-      try {
-        const [borrowsData, finesData] = await Promise.all([
-          getMyBorrows(),
-          finesApi.getMyFines()
-        ]);
-        setBorrows(borrowsData);
-        setFines(finesData);
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+    if (token) {
+      (async () => {
+        try {
+          const [borrowsData, finesData] = await Promise.all([
+            getMyBorrows(),
+            finesApi.getMyFines()
+          ]);
+          setBorrows(borrowsData);
+          setFines(finesData);
+        } catch (err: any) {
+          if (err.response?.status !== 401) {
+            console.error('Failed to load dashboard data:', err);
+          }
+        } finally {
+
+          setIsLoading(false);
+        }
+      })();
+    }
+  }, [token]);
+
 
   const activeBorrows = borrows.filter(
     (b) => b.status === BorrowStatus.PENDING || b.status === BorrowStatus.APPROVED,

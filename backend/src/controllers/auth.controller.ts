@@ -1,10 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { AuthService } from '../services/auth.service'
-import { authMiddleware } from '../middlewares/auth.middleware'
 
 export const authController = new Elysia({ prefix: '/auth' })
-    .use(authMiddleware)
-    .post('/register', async ({ body, error }) => {
+    .post('/register', async ({ body, set }) => {
         try {
             const user = await AuthService.register(body)
             return {
@@ -17,8 +15,10 @@ export const authController = new Elysia({ prefix: '/auth' })
                 }
             }
         } catch (e: any) {
-            return error(400, e.message || 'Registration failed')
+            set.status = 400
+            return { message: e.message || 'Registration failed' }
         }
+
     }, {
         body: t.Object({
             email: t.String({ format: 'email' }),
@@ -31,11 +31,12 @@ export const authController = new Elysia({ prefix: '/auth' })
             }))
         })
     })
-    .post('/login', async ({ body, jwt, error }) => {
+    .post('/login', async ({ body, jwt, set }: any) => {
         const user = await AuthService.login(body)
         
         if (!user) {
-            return error(401, 'Invalid email or password')
+            set.status = 401
+            return { message: 'Invalid email or password' }
         }
 
         const token = await jwt.sign({

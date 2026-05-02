@@ -5,6 +5,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import RoleGuard from '@/components/RoleGuard';
 import BookModal from '@/components/BookModal';
 import api from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+
 import { 
   Plus, Search, Edit2, Trash2, BookOpen, 
   Hash, User, Tag, Layers, Loader2, AlertCircle 
@@ -27,18 +29,27 @@ export default function LibrarianBooksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
 
+  const { token } = useAuth();
+
   useEffect(() => {
-    fetchBooks();
-  }, []);
+    if (token) {
+      fetchBooks();
+    }
+  }, [token]);
+
 
   const fetchBooks = async () => {
     setIsLoading(true);
     try {
       const response = await api.get('/books');
-      setBooks(response.data);
-    } catch (err) {
-      console.error('Failed to fetch books:', err);
+      const bookData = response.data.books || response.data;
+      setBooks(bookData);
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch books:', err);
+      }
     } finally {
+
       setIsLoading(false);
     }
   };
@@ -65,11 +76,13 @@ export default function LibrarianBooksPage() {
     setIsModalOpen(true);
   };
 
-  const filteredBooks = books.filter(book => 
-    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredBooks = Array.isArray(books) 
+    ? books.filter(book => 
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <ProtectedRoute>

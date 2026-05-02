@@ -8,7 +8,7 @@ const borrowWithRelations = {
         select: { id: true, name: true, email: true, role: true },
     },
     book: {
-        select: { id: true, title: true, author: true, isbn: true, category: true },
+        select: { id: true, title: true, author: true, isbn: true, category: true, type: true },
     },
     fine: true,
 } as const
@@ -45,6 +45,14 @@ export const BorrowRepository = {
         return prisma.borrow.findUnique({
             where: { id },
             include: borrowWithRelations,
+        })
+    },
+
+    /** All borrows in the system — for stats. */
+    async findAll() {
+        return prisma.borrow.findMany({
+            include: borrowWithRelations,
+            orderBy: { createdAt: 'desc' },
         })
     },
 
@@ -117,6 +125,27 @@ export const BorrowRepository = {
                 bookId,
                 status: BorrowStatus.APPROVED,
             },
+        })
+    },
+
+    /** Find all approved borrows due exactly tomorrow */
+    async findDueTomorrow() {
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(0, 0, 0, 0)
+        
+        const nextDay = new Date(tomorrow)
+        nextDay.setDate(nextDay.getDate() + 1)
+
+        return prisma.borrow.findMany({
+            where: {
+                status: BorrowStatus.APPROVED,
+                dueDate: {
+                    gte: tomorrow,
+                    lt: nextDay,
+                },
+            },
+            include: borrowWithRelations,
         })
     },
 }

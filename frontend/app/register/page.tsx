@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import api from '@/lib/api';
+import api, { ApiError } from '@/lib/api';
+
 import { UserPlus, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 
 const registerSchema = z.object({
@@ -38,9 +39,11 @@ export default function RegisterPage() {
     try {
       await api.post('/auth/register', data);
       router.push('/login?registered=true');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      setError((apiError.response?.data as { message?: string })?.message || 'Registration failed. Please try again.');
     } finally {
+
       setIsLoading(false);
     }
   };

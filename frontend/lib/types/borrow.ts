@@ -56,5 +56,4 @@ export interface Fine {
 
 export interface CreateBorrowDto {
   bookId: number;
-  type: BorrowType;
 }

@@ -11,6 +11,7 @@ interface BookItem {
   author: string;
   isbn: string;
   category: string;
+  type: string;
   quantity: number;
   available: number;
 }

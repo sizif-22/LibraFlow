@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+
 import RoleGuard from '@/components/RoleGuard';
 import { returnBorrow } from '@/lib/api/borrows';
 import { Borrow, BorrowType } from '@/lib/types/borrow';
@@ -166,17 +168,25 @@ export default function LibrarianReturnsPage() {
         // Fallback: empty list gracefully
         setBorrows([]);
       }
-    } catch (err) {
-      console.error('Failed to fetch active borrows:', err);
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch active borrows:', err);
+      }
       setBorrows([]);
+
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  const { token } = useAuth();
+
   useEffect(() => {
-    fetchActiveBorrows();
-  }, [fetchActiveBorrows]);
+    if (token) {
+      fetchActiveBorrows();
+    }
+  }, [fetchActiveBorrows, token]);
+
 
   const handleReturn = async (id: number) => {
     setActingId(id);

@@ -18,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased selection:bg-sky-500/30`}>
+      <body 
+        className={`${inter.className} antialiased selection:bg-sky-500/30`}
+        suppressHydrationWarning
+      >
         <AuthProvider>
           <div className="min-h-screen flex flex-col">
             <Navbar />
