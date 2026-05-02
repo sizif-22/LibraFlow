@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Book } from 'lucide-react';
+import { Book, Newspaper, GraduationCap } from 'lucide-react';
 import BorrowModal from '@/components/BorrowModal';
 import SuccessToast from '@/components/SuccessToast';
 
@@ -38,11 +38,18 @@ export default function BookCard({ book, hasUnpaidFine = false }: BookCardProps)
       <div className="bg-[#111111] border border-[#222222] rounded-[12px] overflow-hidden transition-all flex flex-col h-full">
         {/* Cover area */}
         <div className="h-[200px] bg-[#1a1a1a] flex items-center justify-center relative">
-          <Book size={60} className="text-[#333333]" />
+          {
+            book.type == 'BOOK'
+            ? <Book size={60} className="text-[#333333]" />
+            : book.type == 'MAGAZINE'
+            ? <Newspaper size={60} className="text-[#333333]" />
+            : book.type == 'THESIS'
+            ? <GraduationCap size={60} className="text-[#333333]" />
+            : <Book size={60} className="text-[#333333]" />
+          }
 
-          {/* Availability badge */}
           <div className="absolute top-4 left-4">
-            <div className={`border px-3 py-1 rounded-[20px] text-[11px] font-[500] ${
+            <div className={`border px-3 py-1 rounded-[20px] text-[11px] font-medium ${
               isAvailable 
                 ? 'border-[#444444] text-white' 
                 : 'border-[#333333] text-[#555555]'
@@ -54,10 +61,10 @@ export default function BookCard({ book, hasUnpaidFine = false }: BookCardProps)
 
         {/* Info area */}
         <div className="p-4 flex flex-col flex-1">
-          <span className="text-[10px] text-[#666666] uppercase tracking-wider font-[600]">
+          <span className="text-[10px] text-[#666666] uppercase tracking-wider font-semibold">
             {book.category}
           </span>
-          <h3 className="text-[16px] font-[700] text-white mt-1 line-clamp-1">
+          <h3 className="text-[16px] font-bold text-white mt-1 line-clamp-1">
             {book.title}
           </h3>
           <p className="text-[13px] text-[#888888] italic mt-1 line-clamp-1">
@@ -73,7 +80,7 @@ export default function BookCard({ book, hasUnpaidFine = false }: BookCardProps)
             <button
               onClick={() => canBorrow && setShowModal(true)}
               disabled={!canBorrow}
-              className={`w-full h-[40px] rounded-[6px] text-[12px] font-[600] uppercase tracking-wide mt-3 transition-all ${
+              className={`w-full h-[40px] rounded-[6px] text-[12px] font-semibold uppercase tracking-wide mt-3 transition-all ${
                 canBorrow
                   ? 'bg-white text-black hover:bg-[#eeeeee]'
                   : 'bg-[#1a1a1a] text-[#444444] cursor-not-allowed border border-[#222222]'

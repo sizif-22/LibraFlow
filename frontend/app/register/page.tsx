@@ -7,14 +7,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import api, { ApiError } from '@/lib/api';
-import { BarChart3, Loader2 } from 'lucide-react';
+import { BarChart3, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Footer from '@/components/Footer';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['STUDENT', 'LIBRARIAN', 'ADMIN']),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -23,6 +26,9 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const {
     register,
@@ -30,7 +36,6 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: 'STUDENT' },
   });
 
   const onSubmit = async (data: RegisterForm) => {
@@ -49,7 +54,14 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-between">
-      <div className="flex-1 flex items-center justify-center w-full p-6">
+      <div className="flex-1 flex flex-col items-center justify-center w-full p-6">
+        <Link 
+          href="/" 
+          className="flex items-center gap-2 text-[#888888] hover:text-white transition-all text-[13px] mb-8 self-center sm:self-auto sm:mr-[340px]"
+        >
+          <ArrowLeft size={16} />
+          Back to Home
+        </Link>
         <div className="w-full max-w-[420px] bg-[#1a1a1a] rounded-[16px] border border-[#2a2a2a] p-[48px] shadow-2xl">
           <div className="flex flex-col items-center">
             <BarChart3 className="text-[#555555] mb-2" size={24} />
@@ -95,34 +107,42 @@ export default function RegisterPage() {
 
             <div className="space-y-[6px]">
               <label className="text-[11px] text-[#888888] uppercase tracking-wide block ml-[2px]">Password</label>
-              <input
-                {...register('password')}
-                type="password"
-                placeholder="••••••••"
-                className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] px-[16px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
-              />
+              <div className="relative">
+                <input
+                  {...register('password')}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] pl-[16px] pr-[44px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] hover:text-[#888888] transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && <p className="text-[#888888] text-[11px] mt-1 ml-[2px]">{errors.password.message}</p>}
             </div>
 
             <div className="space-y-[6px]">
               <label className="text-[11px] text-[#888888] uppercase tracking-wide block ml-[2px]">Confirm Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] px-[16px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
-              />
-            </div>
-
-            <div className="space-y-[6px]">
-              <label className="text-[11px] text-[#888888] uppercase tracking-wide block ml-[2px]">Role</label>
-              <select
-                {...register('role')}
-                className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] px-[16px] text-white focus:outline-none focus:border-[#444444] transition-all text-[14px] appearance-none cursor-pointer"
-              >
-                <option value="STUDENT" className="bg-[#1a1a1a]">Student</option>
-                <option value="LIBRARIAN" className="bg-[#1a1a1a]">Librarian</option>
-                <option value="ADMIN" className="bg-[#1a1a1a]">Admin</option>
-              </select>
+              <div className="relative">
+                <input
+                  {...register('confirmPassword')}
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] pl-[16px] pr-[44px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] hover:text-[#888888] transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.confirmPassword && <p className="text-[#888888] text-[11px] mt-1 ml-[2px]">{errors.confirmPassword.message}</p>}
             </div>
 
             <div className="h-[12px]" />

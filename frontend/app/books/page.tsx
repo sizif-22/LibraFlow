@@ -98,14 +98,13 @@ export default function BooksPage() {
                 />
               </div>
               <button className="h-full bg-white text-black px-8 rounded-[8px] flex items-center gap-2 hover:bg-[#eeeeee] transition-all text-[12px] font-semibold uppercase tracking-wider">
-                ⚡ FILTER
+               FILTER
               </button>
             </div>
 
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-32 gap-4">
-                <Loader2 className="animate-spin text-white" size={48} />
-                <p className="text-[#888888] uppercase tracking-widest text-[11px]">ACCESSING ARCHIVES...</p>
+              <div className="flex items-center justify-center py-32">
+                <Loader2 className="animate-spin text-[#555555]" size={24} />
               </div>
             ) : filteredBooks.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

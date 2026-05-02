@@ -16,10 +16,17 @@ export const AdminService = {
         })
     },
 
-    async changeUserRole(userId: number, role: Role) {
-        return await prisma.user.update({
-            where: { id: userId },
-            data: { role },
+    async createUser(data: any) {
+        const { email, password, name, role } = data
+        const { hashPassword } = await import('../utils/password')
+        const hashedPassword = await hashPassword(password)
+        return await prisma.user.create({
+            data: {
+                email,
+                name,
+                password: hashedPassword,
+                role
+            },
             select: {
                 id: true,
                 name: true,

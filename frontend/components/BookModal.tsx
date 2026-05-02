@@ -104,116 +104,121 @@ export default function BookModal({ isOpen, onClose, onSuccess, book }: BookModa
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="glass-dark border border-white/10 w-full max-w-xl rounded-2xl shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-300">
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h2 className="text-xl font-bold text-white">
-            {isEditing ? 'Edit Book Details' : 'Add New Book to Catalog'}
+      <div className="bg-[#111111] border border-[#222222] w-full max-w-xl rounded-[16px] shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div className="flex items-center justify-between p-8 border-b border-[#1f1f1f]">
+          <h2 className="text-[20px] font-[800] text-white uppercase tracking-tight">
+            {isEditing ? 'Edit Book Details' : 'Add New Book'}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-[#555555] hover:text-white transition-colors">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl text-sm mb-4">
+            <div className="bg-white/5 border border-[#333333] text-white/70 px-4 py-3 rounded-[8px] text-[12px] mb-4 text-center">
               {error}
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Title</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[11px] font-[600] text-[#888888] uppercase tracking-[0.1em] ml-1">Title</label>
               <input
                 {...register('title')}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full bg-[#1a1a1a] border border-[#222222] rounded-[8px] py-3 px-4 text-white placeholder:text-[#444444] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
                 placeholder="e.g. Clean Code"
               />
-              {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
+              {errors.title && <p className="text-[#666666] text-[11px] mt-1 ml-1">{errors.title.message}</p>}
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Author</label>
+            <div className="space-y-2">
+              <label className="text-[11px] font-[600] text-[#888888] uppercase tracking-[0.1em] ml-1">Author</label>
               <input
                 {...register('author')}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full bg-[#1a1a1a] border border-[#222222] rounded-[8px] py-3 px-4 text-white placeholder:text-[#444444] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
                 placeholder="e.g. Robert C. Martin"
               />
-              {errors.author && <p className="text-red-500 text-xs mt-1">{errors.author.message}</p>}
+              {errors.author && <p className="text-[#666666] text-[11px] mt-1 ml-1">{errors.author.message}</p>}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">ISBN</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[11px] font-[600] text-[#888888] uppercase tracking-[0.1em] ml-1">ISBN</label>
               <input
                 {...register('isbn')}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full bg-[#1a1a1a] border border-[#222222] rounded-[8px] py-3 px-4 text-white placeholder:text-[#444444] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
                 placeholder="Unique ISBN code"
               />
-              {errors.isbn && <p className="text-red-500 text-xs mt-1">{errors.isbn.message}</p>}
+              {errors.isbn && <p className="text-[#666666] text-[11px] mt-1 ml-1">{errors.isbn.message}</p>}
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Category</label>
-              <select
-                {...register('category')}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
-              >
-                <option value="" className="bg-slate-900">Select Category</option>
-                <option value="Computer Science" className="bg-slate-900">Computer Science</option>
-                <option value="History" className="bg-slate-900">History</option>
-                <option value="Mathematics" className="bg-slate-900">Mathematics</option>
-                <option value="Physics" className="bg-slate-900">Physics</option>
-                <option value="Literature" className="bg-slate-900">Literature</option>
-              </select>
-              {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
+            <div className="space-y-2">
+              <label className="text-[11px] font-[600] text-[#888888] uppercase tracking-[0.1em] ml-1">Category</label>
+              <div className="relative">
+                <select
+                  {...register('category')}
+                  className="w-full bg-[#1a1a1a] border border-[#222222] rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-[#444444] appearance-none transition-all text-[14px]"
+                >
+                  <option value="" className="bg-[#111111]">Select Category</option>
+                  <option value="Computer Science" className="bg-[#111111]">Computer Science</option>
+                  <option value="History" className="bg-[#111111]">History</option>
+                  <option value="Mathematics" className="bg-[#111111]">Mathematics</option>
+                  <option value="Physics" className="bg-[#111111]">Physics</option>
+                  <option value="Literature" className="bg-[#111111]">Literature</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#555555]">
+                  <Save size={14} className="opacity-0" /> {/* Placeholder for alignment if needed, or just let it be */}
+                </div>
+              </div>
+              {errors.category && <p className="text-[#666666] text-[11px] mt-1 ml-1">{errors.category.message}</p>}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Total Quantity</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[11px] font-[600] text-[#888888] uppercase tracking-[0.1em] ml-1">Total Quantity</label>
               <input
                 {...register('quantity', { valueAsNumber: true })}
                 type="number"
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full bg-[#1a1a1a] border border-[#222222] rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-[#444444] transition-all text-[14px]"
               />
-              {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>}
+              {errors.quantity && <p className="text-[#666666] text-[11px] mt-1 ml-1">{errors.quantity.message}</p>}
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Available Units</label>
+            <div className="space-y-2">
+              <label className="text-[11px] font-[600] text-[#888888] uppercase tracking-[0.1em] ml-1">Available Units</label>
               <input
                 {...register('available', { valueAsNumber: true })}
                 type="number"
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full bg-[#1a1a1a] border border-[#222222] rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-[#444444] transition-all text-[14px]"
               />
-              {errors.available && <p className="text-red-500 text-xs mt-1">{errors.available.message}</p>}
+              {errors.available && <p className="text-[#666666] text-[11px] mt-1 ml-1">{errors.available.message}</p>}
             </div>
           </div>
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-4 pt-6">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-white/5 hover:bg-white/10 text-white py-4 rounded-xl font-bold transition-all border border-white/10"
+              className="flex-1 bg-transparent hover:bg-[#1a1a1a] text-[#888888] hover:text-white py-4 rounded-[8px] text-[12px] font-[700] uppercase tracking-[0.1em] transition-all border border-[#222222]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-[2] bg-primary hover:bg-sky-400 text-primary-foreground py-4 rounded-xl font-bold transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2"
+              className="flex-[2] bg-white hover:bg-[#eeeeee] text-black py-4 rounded-[8px] text-[12px] font-[800] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <Loader2 className="animate-spin" size={20} />
+                <Loader2 className="animate-spin text-black" size={20} />
               ) : (
                 <>
-                  <Save size={20} />
-                  {isEditing ? 'Update Book' : 'Add Book'}
+                  <Save size={18} />
+                  {isEditing ? 'Update Entry' : 'Add to Archive'}
                 </>
               )}
             </button>

@@ -16,17 +16,17 @@ export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
 
   if (!user || !allowedRoles.includes(user.role)) {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-6 bg-slate-950 text-center">
-        <div className="bg-red-500/10 p-6 rounded-full mb-6">
-          <ShieldAlert className="text-red-500" size={64} />
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#000000] text-center">
+        <div className="w-24 h-24 bg-[#111111] border border-[#222222] flex items-center justify-center rounded-full mb-8 shadow-2xl shadow-black">
+          <ShieldAlert className="text-[#555555]" size={40} />
         </div>
-        <h1 className="text-4xl font-bold text-white mb-4">Access Denied</h1>
-        <p className="text-slate-400 max-w-md mb-8">
-          You don't have the necessary permissions to view this page. This area is restricted to {allowedRoles.join(', ')} users only.
+        <h1 className="text-[32px] font-[800] text-white uppercase tracking-tight mb-4">Access Denied</h1>
+        <p className="text-[14px] text-[#666666] max-w-md mb-10 leading-relaxed">
+          You don't have the necessary permissions to view this archive sector. This area is restricted to <span className="text-white font-[600]">{allowedRoles.join(', ')}</span> personnel only.
         </p>
         <Link
           href="/books"
-          className="bg-white/5 hover:bg-white/10 text-white px-8 py-3 rounded-xl transition-all border border-white/10 font-medium"
+          className="bg-white hover:bg-[#eeeeee] text-black px-10 py-4 rounded-xl transition-all text-[12px] font-[800] uppercase tracking-[0.2em]"
         >
           Return to Catalog
         </Link>

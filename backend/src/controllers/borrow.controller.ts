@@ -71,6 +71,21 @@ export const borrowController = new Elysia({ prefix: '/borrows' })
         detail: { tags: ['Borrows'], summary: 'Librarian — View all pending borrow requests' },
     })
 
+    .get('/active', async ({ set }: any) => {
+        try {
+            const borrows = await BorrowService.getActiveBorrows()
+            return { borrows, total: borrows.length }
+        } catch (e: any) {
+            set.status = 500
+            return { message: e.message || 'Failed to fetch active borrows' }
+        }
+
+    }, {
+        isAuth: true,
+        hasRole: ['LIBRARIAN', 'ADMIN'],
+        detail: { tags: ['Borrows'], summary: 'Librarian — View all active borrow requests' },
+    })
+
     // ─────────────────────────────────────────────────────────────────────────
     // GET /api/borrows/my
     // US-15: Student views their own borrowing history

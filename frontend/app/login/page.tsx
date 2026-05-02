@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import api, { ApiError } from '@/lib/api';
 import { useAuth, User } from '@/context/AuthContext';
-import { BarChart3, Loader2 } from 'lucide-react';
+import { BarChart3, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Footer from '@/components/Footer';
 
 const loginSchema = z.object({
@@ -25,6 +25,7 @@ function LoginContent() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -58,7 +59,14 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-between">
-      <div className="flex-1 flex items-center justify-center w-full p-6">
+      <div className="flex-1 flex flex-col items-center justify-center w-full p-6">
+        <Link 
+          href="/" 
+          className="flex items-center gap-2 text-[#888888] hover:text-white transition-all text-[13px] mb-8 self-center sm:self-auto sm:mr-[340px]"
+        >
+          <ArrowLeft size={16} />
+          Back to Home
+        </Link>
         <div className="w-full max-w-[420px] bg-[#1a1a1a] rounded-[16px] border border-[#2a2a2a] p-[48px] shadow-2xl">
           <div className="flex flex-col items-center">
             <BarChart3 className="text-[#555555] mb-2" size={24} />
@@ -102,12 +110,21 @@ function LoginContent() {
                 <label className="text-[12px] text-[#aaaaaa] uppercase tracking-wide">Password</label>
                 <Link href="#" className="text-[12px] text-[#888888] hover:text-white transition-colors">Forgot?</Link>
               </div>
-              <input
-                {...register('password')}
-                type="password"
-                placeholder="••••••••"
-                className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] px-[16px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
-              />
+              <div className="relative">
+                <input
+                  {...register('password')}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] pl-[16px] pr-[44px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] hover:text-[#888888] transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && <p className="text-[#888888] text-[11px] mt-1 ml-[2px]">{errors.password.message}</p>}
             </div>
 

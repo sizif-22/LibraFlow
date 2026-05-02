@@ -9,7 +9,6 @@ export default function Footer() {
         © 2024 LIBRAFLOW UNIVERSITY LIBRARY SYSTEM. EDITORIAL PRECISION.
       </div>
       <div className="flex gap-8">
-        <Link href="#" className="hover:text-[#555555] transition-colors">ARCHIVE POLICY</Link>
         <Link href="#" className="hover:text-[#555555] transition-colors">TERMS OF ACCESS</Link>
         <Link href="#" className="hover:text-[#555555] transition-colors">SYSTEM STATUS</Link>
       </div>

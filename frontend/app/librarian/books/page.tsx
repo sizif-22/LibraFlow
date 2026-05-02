@@ -16,6 +16,16 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Book {
   id: number;
@@ -33,6 +43,8 @@ export default function LibrarianBooksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<number | null>(null);
 
   const { token } = useAuth();
 
@@ -59,15 +71,23 @@ export default function LibrarianBooksPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this book? This action cannot be undone.')) return;
+  const confirmDelete = async () => {
+    if (!bookToDelete) return;
     try {
-      await api.delete(`/books/${id}`);
+      await api.delete(`/books/${bookToDelete}`);
       fetchBooks();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to delete book. It might have active borrows.');
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setBookToDelete(null);
     }
+  };
+
+  const handleDeleteClick = (id: number) => {
+    setBookToDelete(id);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleEdit = (book: Book) => {
@@ -183,7 +203,7 @@ export default function LibrarianBooksPage() {
                           <Trash2 
                             size={16} 
                             className="text-[#555555] cursor-pointer hover:text-white transition-all" 
-                            onClick={() => handleDelete(book.id)}
+                            onClick={() => handleDeleteClick(book.id)}
                           />
                         </div>
                       </td>
@@ -220,6 +240,31 @@ export default function LibrarianBooksPage() {
           onSuccess={fetchBooks}
           book={editingBook}
         />
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent className="bg-[#111111] border border-[#222222] rounded-[16px] max-w-[400px]">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white font-[800] uppercase tracking-tight">Confirm Deletion</AlertDialogTitle>
+              <AlertDialogDescription className="text-[#888888] text-[14px]">
+                Are you sure you want to delete this book from the archival catalog? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-8 gap-4">
+              <AlertDialogCancel 
+              variant={'ghost'} className='text-white/70'
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete}
+                variant="destructive"
+                // className="flex-1 h-[48px] rounded-[8px] font-[800] uppercase text-[12px] tracking-widest transition-all"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </RoleGuard>
     </ProtectedRoute>
   );

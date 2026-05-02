@@ -14,22 +14,25 @@ export const adminController = new Elysia({ prefix: '/admin' })
             summary: 'List all users',
         },
     })
-    .put('/users/:id/role', async ({ params: { id }, body, set }: any) => {
+    .post('/users', async ({ body, set }: any) => {
         try {
-            return await AdminService.changeUserRole(parseInt(id), body.role as Role)
+            return await AdminService.createUser(body)
         } catch (e: any) {
             set.status = 400
-            return { message: e.message || 'Failed to change role' }
+            return { message: e.message || 'Failed to create user' }
         }
     }, {
         isAuth: true,
         hasRole: ['ADMIN'],
         body: t.Object({
+            name: t.String(),
+            email: t.String(),
+            password: t.String(),
             role: t.String(),
         }),
         detail: {
             tags: ['Admin'],
-            summary: 'Change user role',
+            summary: 'Create a new user',
         },
     })
     .put('/users/:id/status', async ({ params: { id }, body, set }: any) => {

@@ -32,7 +32,7 @@ export default function AdminLayout({
           {children}
         </main>
 
-        <footer className="px-12 py-8 border-t border-[#1f1f1f] flex items-center justify-between text-[10px] text-[#555555] tracking-wider uppercase">
+        <footer className="h-20 px-12 py-8 border-t border-[#1f1f1f] flex items-center justify-between text-[10px] text-[#555555] tracking-wider uppercase">
           <div>© 2024 LIBRAFLOW UNIVERSITY LIBRARY SYSTEM. EDITORIAL PRECISION.</div>
           <div className="flex items-center gap-8">
             <span className="hover:text-white cursor-pointer transition-all">ARCHIVE POLICY</span>

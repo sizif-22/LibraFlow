@@ -65,6 +65,15 @@ export const BorrowRepository = {
         })
     },
 
+    /** All borrows currently in APPROVED status — for the librarian returns page. */
+    async findAllActive() {
+        return prisma.borrow.findMany({
+            where: { status: BorrowStatus.APPROVED },
+            include: borrowWithRelations,
+            orderBy: { dueDate: 'asc' }, 
+        })
+    },
+
     /** Active (APPROVED) borrows for a given student — shows due dates. */
     async findActiveByStudent(studentId: number) {
         return prisma.borrow.findMany({

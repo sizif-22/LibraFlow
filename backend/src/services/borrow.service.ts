@@ -187,6 +187,13 @@ export const BorrowService = {
     },
 
     /**
+     * Librarian views all active (approved) borrow requests.
+     */
+    async getActiveBorrows() {
+        return BorrowRepository.findAllActive()
+    },
+
+    /**
      * US-17: Librarian views all pending borrow requests.
      */
     async getPendingRequests() {

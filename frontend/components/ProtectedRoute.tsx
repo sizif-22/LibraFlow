@@ -33,9 +33,8 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
 
   if (isLoading) {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center gap-4 bg-slate-950">
-        <Loader2 className="animate-spin text-primary" size={48} />
-        <p className="text-slate-400 animate-pulse">Loading secure session...</p>
+      <div className="fixed inset-0 flex items-center justify-center bg-black z-50">
+        <Loader2 className="animate-spin text-[#555555]" size={24} />
       </div>
     );
   }

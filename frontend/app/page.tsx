@@ -10,8 +10,11 @@ export default function Home() {
   const { user } = useAuth();
 
   return (
-    <div className="flex flex-col bg-[#000000] min-h-screen">
+    <div className="flex flex-col bg-[#000000] min-h-screen ">
       {/* Hero Section */}
+
+      <div className="min-h-screen space-y-32 mb-8">
+
       <section className="pt-32 pb-24 px-10 text-center flex flex-col items-center">
         <h1 className="text-[56px] font-[800] tracking-tight leading-tight flex flex-col">
           <span className="text-white">Modern Library</span>
@@ -37,7 +40,7 @@ export default function Home() {
       </section>
 
       {/* Stats Bar */}
-      <section className="bg-[#111111] border-y border-[#222222] py-[32px] px-10">
+      <section className="bg-[#111111] border-y border-[#222222] py-[32px]  px-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="flex flex-col items-center lg:items-start">
             <span className="text-[36px] font-[800] text-white tracking-tight">1.2M</span>
@@ -57,9 +60,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+    </div>
 
       {/* Feature Cards Grid */}
-      <section className="py-32 px-10">
+      <section className="pb-32 px-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[28px] hover:border-[#444444] transition-all">
             <Search size={20} className="text-[#888888]" />
