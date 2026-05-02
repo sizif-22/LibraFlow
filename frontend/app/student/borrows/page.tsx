@@ -1,133 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { getMyBorrows } from '@/lib/api/borrows';
 import { Borrow, BorrowStatus } from '@/lib/types/borrow';
-import {
-  BookOpen, Clock, CheckCircle, XCircle, RefreshCw,
-  Loader2, Calendar, Tag, AlertTriangle, BookMarked,
-  DollarSign} from 'lucide-react';
+import { Loader2, MoreVertical, Info, XCircle, Filter } from 'lucide-react';
 import { finesApi } from '@/lib/api/fines';
 import { Fine } from '@/lib/types/fine';
-
-
-// ─── Status config ────────────────────────────────────────────────────────────
-
-const STATUS_CONFIG: Record<BorrowStatus, { label: string; color: string; bg: string; border: string; icon: React.ElementType }> = {
-  [BorrowStatus.PENDING]: {
-    label: 'Pending',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20',
-    icon: Clock,
-  },
-  [BorrowStatus.APPROVED]: {
-    label: 'Active',
-    color: 'text-sky-400',
-    bg: 'bg-sky-500/10',
-    border: 'border-sky-500/20',
-    icon: CheckCircle,
-  },
-  [BorrowStatus.REJECTED]: {
-    label: 'Rejected',
-    color: 'text-red-400',
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/20',
-    icon: XCircle,
-  },
-  [BorrowStatus.RETURNED]: {
-    label: 'Returned',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/20',
-    icon: RefreshCw,
-  },
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  BOOK: 'Book',
-  MAGAZINE: 'Magazine',
-  THESIS: 'Thesis',
-};
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+import Footer from '@/components/Footer';
 
 const fmt = (dateStr: string | null) =>
   dateStr ? new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
-const isOverdue = (dueDate: string | null) =>
-  dueDate ? new Date(dueDate) < new Date() : false;
-
-// ─── BorrowRow ────────────────────────────────────────────────────────────────
-
-function BorrowRow({ borrow }: { borrow: Borrow }) {
-  const cfg = STATUS_CONFIG[borrow.status];
-  const Icon = cfg.icon;
-  const overdue = borrow.status === BorrowStatus.APPROVED && isOverdue(borrow.dueDate);
-
-  return (
-    <div className="glass-dark rounded-2xl border border-white/5 hover:border-white/10 p-5 transition-all group">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        {/* Book icon */}
-        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-          <BookOpen size={22} className="text-slate-500 group-hover:text-primary transition-colors" />
-        </div>
-
-        {/* Book info */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-white font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-            {borrow.book.title}
-          </h3>
-          <p className="text-slate-500 text-sm mt-0.5">{borrow.book.author}</p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-slate-500">
-            <span className="flex items-center gap-1">
-              <Tag size={11} />
-              {TYPE_LABELS[borrow.type] ?? borrow.type}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar size={11} />
-              Borrowed: {fmt(borrow.borrowDate)}
-            </span>
-            {borrow.dueDate && (
-              <span className={`flex items-center gap-1 ${overdue ? 'text-red-400 font-semibold' : ''}`}>
-                {overdue && <AlertTriangle size={11} />}
-                Due: {fmt(borrow.dueDate)}
-                {overdue && ' (Overdue!)'}
-              </span>
-            )}
-            {borrow.returnDate && (
-              <span className="flex items-center gap-1 text-emerald-500">
-                <CheckCircle size={11} />
-                Returned: {fmt(borrow.returnDate)}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Status badge */}
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shrink-0
-          ${cfg.color} ${cfg.bg} ${cfg.border}`}
-        >
-          <Icon size={12} />
-          {cfg.label}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-type Tab = 'active' | 'past' | 'fines';
-
 export default function StudentBorrowsPage() {
   const [borrows, setBorrows] = useState<Borrow[]>([]);
-  const [fines, setFines] = useState<Fine[]>([]);
+  const [, setFines] = useState<Fine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>('active');
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'ACTIVE' | 'ARCHIVED'>('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { token } = useAuth();
 
@@ -141,172 +32,179 @@ export default function StudentBorrowsPage() {
           ]);
           setBorrows(borrowsData);
           setFines(finesData);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
           if (err.response?.status !== 401) {
             console.error('Failed to load dashboard data:', err);
           }
         } finally {
-
           setIsLoading(false);
         }
       })();
     }
   }, [token]);
 
+  const activeCount = borrows.filter(b => b.status === BorrowStatus.APPROVED || b.status === BorrowStatus.PENDING).length;
+  const overdueCount = borrows.filter(b => b.status === BorrowStatus.APPROVED && new Date(b.dueDate!) < new Date()).length;
 
-  const activeBorrows = borrows.filter(
-    (b) => b.status === BorrowStatus.PENDING || b.status === BorrowStatus.APPROVED,
-  );
-  const pastBorrows = borrows.filter(
-    (b) => b.status === BorrowStatus.RETURNED || b.status === BorrowStatus.REJECTED,
-  );
-
-  const unpaidFines = fines.filter(f => !f.isPaid);
-  const totalFines = unpaidFines.reduce((sum, f) => sum + f.amount, 0);
-
-  const displayed = activeTab === 'active' ? activeBorrows : pastBorrows;
-
-
-
-  // Count overdue
-  const overdueCount = activeBorrows.filter(
-    (b) => b.status === BorrowStatus.APPROVED && isOverdue(b.dueDate),
-  ).length;
+  const filteredBorrows = borrows.filter(b => {
+    const matchesSearch = b.book.title.toLowerCase().includes(searchTerm.toLowerCase());
+    if (activeFilter === 'ACTIVE') return matchesSearch && (b.status === BorrowStatus.APPROVED || b.status === BorrowStatus.PENDING);
+    if (activeFilter === 'ARCHIVED') return matchesSearch && (b.status === BorrowStatus.RETURNED || b.status === BorrowStatus.REJECTED);
+    return matchesSearch;
+  });
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-950 px-6 py-12">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-[#000000] flex flex-col">
+        <div className="flex-1 px-10 py-16">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <header className="mb-12">
+              <h1 className="text-[48px] font-extrabold text-white leading-tight">My Borrows</h1>
+              <p className="text-[15px] text-[#888888] mt-2">Tracking your academic literature requests and active loans.</p>
+            </header>
 
-          {/* Header */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-xl">
-                <BookMarked size={24} className="text-primary" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">My Borrows</h1>
-                <p className="text-slate-500 text-sm mt-0.5">Track all your borrow requests and returns</p>
-              </div>
-            </div>
-
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4 mt-6">
-              {[
-                { label: 'Active', value: activeBorrows.length, color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20' },
-                { label: 'Overdue', value: overdueCount, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' },
-                { label: 'Total', value: borrows.length, color: 'text-slate-300', bg: 'bg-white/5', border: 'border-white/10' },
-              ].map((stat) => (
-                <div key={stat.label} className={`${stat.bg} ${stat.border} border rounded-2xl p-4 text-center`}>
-                  <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
-                  <div className="text-slate-500 text-xs mt-0.5">{stat.label}</div>
+            {/* Stats Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+              <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[24px] px-[28px]">
+                <span className="text-[11px] text-[#666666] uppercase tracking-[0.15em] font-[500]">ACTIVE LOANS</span>
+                <div className="text-[48px] font-extrabold text-white mt-1 tabular-nums">
+                  {activeCount.toString().padStart(2, '0')}
                 </div>
-              ))}
+              </div>
+              <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[24px] px-[28px]">
+                <span className="text-[11px] text-[#666666] uppercase tracking-[0.15em] font-[500]">PENDING REQUESTS</span>
+                <div className="text-[48px] font-[800] text-white mt-1 tabular-nums">
+                  {borrows.filter(b => b.status === BorrowStatus.PENDING).length.toString().padStart(2, '0')}
+                </div>
+              </div>
+              <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[24px] px-[28px]">
+                <span className="text-[11px] text-[#666666] uppercase tracking-[0.15em] font-[500]">OVERDUE PENALTIES</span>
+                <div className="text-[48px] font-[800] text-white mt-1 tabular-nums">
+                  {overdueCount.toString().padStart(2, '0')}
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Tabs */}
-          <div className="flex gap-1 bg-white/5 border border-white/5 p-1 rounded-2xl mb-6">
-            {([['active', 'Active'], ['past', 'History'], ['fines', 'Fines']] as const).map(([tab, label]) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all
-                  ${activeTab === tab
-                    ? 'bg-primary text-primary-foreground shadow-lg shadow-sky-500/20'
-                    : 'text-slate-400 hover:text-white'
+            {/* Filter + Search Row */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-6">
+                <button 
+                  onClick={() => setActiveFilter('ALL')}
+                  className={`text-[12px] uppercase tracking-wider font-[600] px-5 py-2 rounded-full transition-all ${
+                    activeFilter === 'ALL' ? 'bg-white text-black' : 'text-[#666666] hover:text-white'
                   }`}
-              >
-                {label}
-                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs
-                  ${activeTab === tab ? 'bg-primary-foreground/20' : 'bg-white/10'}`}>
-                  {tab === 'active' ? activeBorrows.length : tab === 'past' ? pastBorrows.length : fines.length}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Content */}
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-3">
-              <Loader2 className="animate-spin text-primary" size={40} />
-              <p className="text-slate-500 text-sm">Loading your dashboard...</p>
-            </div>
-          ) : activeTab === 'fines' ? (
-            <div className="space-y-6">
-              {/* Total Owed Card */}
-              <div className="glass-dark rounded-2xl border border-white/10 p-6 flex items-center justify-between bg-linear-to-br from-amber-500/5 to-transparent">
-                <div>
-                  <h3 className="text-slate-400 text-sm font-medium">Total Amount Owed</h3>
-                  <div className="text-4xl font-bold text-white mt-1 flex items-baseline gap-1">
-                    {totalFines} <span className="text-lg text-slate-500 font-normal">EGP</span>
-                  </div>
-                </div>
-                <div className="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
-                  <DollarSign size={32} className="text-amber-400" />
-                </div>
+                >
+                  ALL RECORDS
+                </button>
+                <button 
+                  onClick={() => setActiveFilter('ACTIVE')}
+                  className={`text-[12px] uppercase tracking-wider font-[600] transition-all ${
+                    activeFilter === 'ACTIVE' ? 'text-white' : 'text-[#666666] hover:text-white'
+                  }`}
+                >
+                  ACTIVE
+                </button>
+                <button 
+                  onClick={() => setActiveFilter('ARCHIVED')}
+                  className={`text-[12px] uppercase tracking-wider font-[600] transition-all ${
+                    activeFilter === 'ARCHIVED' ? 'text-white' : 'text-[#666666] hover:text-white'
+                  }`}
+                >
+                  ARCHIVED
+                </button>
               </div>
 
-              {fines.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="bg-white/5 p-5 rounded-full mb-5 border border-white/10 text-emerald-500">
-                    <CheckCircle size={48} />
-                  </div>
-                  <h2 className="text-xl font-bold text-white mb-2">No Fines</h2>
-                  <p className="text-slate-500 text-sm">Your account is in good standing!</p>
+              <div className="relative w-[280px]">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[#444444]" size={14} />
+                <input
+                  type="text"
+                  placeholder="SEARCH ARCHIVE..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full h-[36px] bg-[#111111] border border-[#2a2a2a] rounded-[6px] pl-10 pr-4 text-white text-[12px] placeholder:text-[#444444] focus:outline-none focus:border-[#444444] uppercase tracking-wider"
+                />
+              </div>
+            </div>
+
+            {/* Borrows Table */}
+            <div className="w-full">
+              <div className="grid grid-cols-[1fr_150px_150px_120px_60px] pb-4 border-b border-[#222222] text-[11px] text-[#555555] uppercase tracking-widest font-[600]">
+                <div>DOCUMENT TITLE</div>
+                <div>REQUEST DATE</div>
+                <div>DUE DATE</div>
+                <div>STATUS</div>
+                <div className="text-right">ACTIONS</div>
+              </div>
+
+              {isLoading ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 className="animate-spin text-white" size={32} />
+                </div>
+              ) : filteredBorrows.length === 0 ? (
+                <div className="py-20 text-center text-[#555555] uppercase tracking-widest text-[12px]">
+                  No records found in archive.
                 </div>
               ) : (
-                <div className="grid gap-4">
-                  {fines.map((fine) => (
-                    <div key={fine.id} className="glass-dark rounded-2xl border border-white/5 p-5 flex items-center justify-between group">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${fine.isPaid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'}`}>
-                          {fine.isPaid ? <CheckCircle size={20} /> : <DollarSign size={20} />}
+                <div className="divide-y divide-[#1a1a1a]">
+                  {filteredBorrows.map((borrow) => {
+                    const isRejected = borrow.status === BorrowStatus.REJECTED;
+                    const isPending = borrow.status === BorrowStatus.PENDING;
+                    const isApproved = borrow.status === BorrowStatus.APPROVED;
+                    
+                    return (
+                      <div key={borrow.id} className="grid grid-cols-[1fr_150px_150px_120px_60px] py-6 items-center">
+                        <div>
+                          <div className={`text-[16px] font-[500] ${isRejected ? 'text-[#444444] line-through' : 'text-white'}`}>
+                            {borrow.book.title}
+                          </div>
+                          <div className="text-[12px] text-[#555555] mt-0.5">Call No: {borrow.book.isbn}</div>
+                        </div>
+                        <div className="text-[14px] text-[#888888]">{fmt(borrow.borrowDate)}</div>
+                        <div className="text-[14px] text-[#888888]">
+                          {isPending ? <span className="text-[#555555]">Processing...</span> : isRejected ? <span className="text-[#555555]">——</span> : fmt(borrow.dueDate)}
                         </div>
                         <div>
-                          <h4 className="text-white font-semibold">{fine.borrow?.book?.title ?? 'Library Fine'}</h4>
-                          <p className="text-slate-500 text-xs mt-0.5">
-                            Added on {fmt(fine.createdAt)}
-                          </p>
+                          <span className={`text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-[4px] border font-[600] ${
+                            isApproved ? 'border-white text-white' : 
+                            isPending ? 'border-[#555555] text-white' : 
+                            'border-[#333333] text-[#555555]'
+                          }`}>
+                            {borrow.status}
+                          </span>
+                        </div>
+                        <div className="flex justify-end">
+                          {isRejected ? (
+                            <Info size={18} className="text-[#444444] cursor-pointer" />
+                          ) : isPending ? (
+                            <XCircle size={18} className="text-[#555555] cursor-pointer" />
+                          ) : (
+                            <MoreVertical size={18} className="text-[#666666] cursor-pointer" />
+                          )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className={`text-lg font-bold ${fine.isPaid ? 'text-emerald-400 line-through opacity-50' : 'text-white'}`}>
-                          {fine.amount} EGP
-                        </div>
-                        <div className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${fine.isPaid ? 'text-emerald-500' : 'text-amber-500'}`}>
-                          {fine.isPaid ? `Paid on ${fmt(fine.paidAt)}` : 'Outstanding'}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
-          ) : displayed.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="bg-white/5 p-5 rounded-full mb-5 border border-white/10">
-                <BookOpen size={48} className="text-slate-600" />
-              </div>
-              <h2 className="text-xl font-bold text-white mb-2">
-                {activeTab === 'active' ? 'No active borrows' : 'No past borrows'}
-              </h2>
-              <p className="text-slate-500 text-sm max-w-xs">
-                {activeTab === 'active'
-                  ? 'Browse the catalog and request a book to get started.'
-                  : 'Your returned and rejected borrows will appear here.'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {displayed.map((borrow) => (
-                <BorrowRow key={borrow.id} borrow={borrow} />
-              ))}
-            </div>
-          )}
 
+            {/* Pagination */}
+            <div className="mt-12 flex items-center justify-between">
+              <span className="text-[11px] text-[#444444] uppercase tracking-widest font-[600]">
+                SHOWING 1-{filteredBorrows.length} OF {filteredBorrows.length} RECORDS
+              </span>
+              <div className="flex gap-6 text-[13px] text-[#888888] font-medium">
+                <button className="hover:text-white transition-colors">Previous</button>
+                <button className="hover:text-white transition-colors">Next</button>
+              </div>
+            </div>
+          </div>
         </div>
+        <Footer />
       </div>
     </ProtectedRoute>
   );
 }
+

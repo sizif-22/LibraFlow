@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
-
 import RoleGuard from '@/components/RoleGuard';
+import AdminLayout from '@/components/AdminLayout';
 import { finesApi } from '@/lib/api/fines';
 import { Fine } from '@/lib/types/fine';
 import { 
-  DollarSign, Search, CheckCircle, Clock, 
-  Loader2, User, BookOpen, AlertCircle
+  CheckCircle, 
+  Loader2, 
+  Filter, 
+  Download 
 } from 'lucide-react';
 import FinePaymentModal from '@/components/FinePaymentModal';
 import SuccessToast from '@/components/SuccessToast';
@@ -17,8 +19,6 @@ import SuccessToast from '@/components/SuccessToast';
 export default function LibrarianFinesPage() {
   const [fines, setFines] = useState<Fine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'UNPAID'>('ALL');
   const [selectedFine, setSelectedFine] = useState<Fine | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -30,186 +30,93 @@ export default function LibrarianFinesPage() {
     }
   }, [token]);
 
-
   const fetchFines = async () => {
     setIsLoading(true);
     try {
       const data = await finesApi.getAllFines();
       setFines(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.response?.status !== 401) {
         console.error('Failed to fetch fines:', err);
       }
     } finally {
-
       setIsLoading(false);
     }
   };
 
-  const filteredFines = fines.filter(fine => {
-    const matchesSearch = 
-      fine.borrow?.student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fine.borrow?.student?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fine.borrow?.book?.title.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = 
-      statusFilter === 'ALL' ||
-      (statusFilter === 'PAID' && fine.isPaid) ||
-      (statusFilter === 'UNPAID' && !fine.isPaid);
-      
-    return matchesSearch && matchesStatus;
-  });
-
-  const unpaidCount = fines.filter(f => !f.isPaid).length;
-  const totalRevenue = fines.filter(f => f.isPaid).reduce((sum, f) => sum + f.amount, 0);
-
   return (
     <ProtectedRoute>
       <RoleGuard allowedRoles={['LIBRARIAN', 'ADMIN']}>
-        <div className="min-h-screen bg-slate-950 px-6 py-12">
-          <div className="max-w-6xl mx-auto">
-            
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-amber-500">
-                    <DollarSign size={24} />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-white">Fines Management</h1>
-                    <p className="text-slate-500 text-sm mt-0.5">View and record student fine payments</p>
-                  </div>
-                </div>
-              </div>
+        <AdminLayout showSearch={true} searchPlaceholder="Search archive database...">
+          <header className="mb-10">
+            <h1 className="text-[36px] font-[800] text-white leading-tight">Fines Management</h1>
+            <p className="text-[14px] text-[#888888] mt-2">Oversee administrative penalties and academic resource reconciliations.</p>
+          </header>
 
-              <div className="flex gap-4">
-                <div className="glass-dark border border-white/5 rounded-2xl p-4 min-w-[160px]">
-                  <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Unpaid Fines</p>
-                  <div className="text-2xl font-bold text-amber-400">{unpaidCount}</div>
-                </div>
-                <div className="glass-dark border border-white/5 rounded-2xl p-4 min-w-[160px]">
-                  <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Total Collected</p>
-                  <div className="text-2xl font-bold text-emerald-400">{totalRevenue} EGP</div>
-                </div>
+          {/* Stat Cards Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[32px]">
+              <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-5 font-[600]">UNPAID FINES</div>
+              <div className="flex items-baseline">
+                <span className="text-[52px] font-[800] text-white leading-none">124</span>
+                <span className="text-[11px] text-[#555555] uppercase font-[600] ml-3">ACCOUNTS</span>
               </div>
             </div>
 
-            {/* Filters */}
-            <div className="glass-dark border border-white/5 rounded-3xl p-6 mb-8 flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input
-                  type="text"
-                  placeholder="Search by student or book..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                />
+            <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[32px]">
+              <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-5 font-[600]">TOTAL COLLECTED</div>
+              <div className="flex items-baseline">
+                <span className="text-[52px] font-[800] text-white leading-none">$4,892</span>
+                <span className="text-[11px] text-[#555555] uppercase font-[600] ml-3">FISCAL YEAR</span>
               </div>
-              <div className="flex gap-2 bg-white/5 p-1 rounded-2xl border border-white/5">
-                {(['ALL', 'UNPAID', 'PAID'] as const).map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => setStatusFilter(status)}
-                    className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all
-                      ${statusFilter === status 
-                        ? 'bg-primary text-primary-foreground shadow-lg' 
-                        : 'text-slate-400 hover:text-white'
-                      }`}
-                  >
-                    {status.charAt(0) + status.slice(1).toLowerCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="glass-dark border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-              {isLoading ? (
-                <div className="py-24 flex flex-col items-center gap-4">
-                  <Loader2 size={40} className="animate-spin text-primary" />
-                  <p className="text-slate-500">Loading fine records...</p>
-                </div>
-              ) : filteredFines.length === 0 ? (
-                <div className="py-24 text-center">
-                  <AlertCircle size={48} className="mx-auto text-slate-700 mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-1">No fines found</h3>
-                  <p className="text-slate-500">Try adjusting your filters or search terms</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-white/5 border-b border-white/10">
-                        <th className="px-6 py-4 text-slate-400 font-medium text-sm">Student</th>
-                        <th className="px-6 py-4 text-slate-400 font-medium text-sm">Book</th>
-                        <th className="px-6 py-4 text-slate-400 font-medium text-sm text-center">Amount</th>
-                        <th className="px-6 py-4 text-slate-400 font-medium text-sm text-center">Status</th>
-                        <th className="px-6 py-4 text-slate-400 font-medium text-sm text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {filteredFines.map((fine) => (
-                        <tr key={fine.id} className="hover:bg-white/2 transition-colors group">
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                                <User size={16} />
-                              </div>
-                              <div>
-                                <div className="text-white font-semibold">{fine.borrow?.student?.name}</div>
-                                <div className="text-slate-500 text-xs">{fine.borrow?.student?.email}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-3">
-                              <BookOpen size={16} className="text-slate-500" />
-                              <div className="text-slate-300 max-w-[200px] truncate">{fine.borrow?.book?.title}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-5 text-center">
-                            <div className="text-white font-mono font-bold">{fine.amount} EGP</div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="flex justify-center">
-                              {fine.isPaid ? (
-                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                                  <CheckCircle size={10} />
-                                  Paid
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
-                                  <Clock size={10} />
-                                  Unpaid
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-5 text-right">
-                            {!fine.isPaid ? (
-                              <button
-                                onClick={() => setSelectedFine(fine)}
-                                className="bg-primary hover:bg-sky-400 text-primary-foreground px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-sky-500/10"
-                              >
-                                Record Payment
-                              </button>
-                            ) : (
-                              <span className="text-slate-500 text-[10px] font-medium">
-                                Paid on {new Date(fine.paidAt!).toLocaleDateString()}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
             </div>
           </div>
-        </div>
+
+          {/* Filter Tabs Row */}
+          <div className="flex justify-between items-center border-b border-[#222222] pb-0 mb-12">
+            <div className="flex items-center gap-2">
+              <button className="bg-white text-black text-[11px] font-[600] uppercase rounded-[20px] px-[18px] py-[6px] tracking-wide mb-[-1px]">
+                ALL OUTSTANDING
+              </button>
+              <button className="text-[#666666] text-[11px] font-[600] uppercase px-[18px] py-[6px] tracking-wide hover:text-white transition-all">
+                OVERDUE (&gt;30 DAYS)
+              </button>
+              <button className="text-[#666666] text-[11px] font-[600] uppercase px-[18px] py-[6px] tracking-wide hover:text-white transition-all">
+                RECONCILIATION PENDING
+              </button>
+            </div>
+            <div className="flex items-center gap-4 text-[#555555] pb-2">
+              <Filter size={16} className="cursor-pointer hover:text-white transition-all" />
+              <Download size={16} className="cursor-pointer hover:text-white transition-all" />
+            </div>
+          </div>
+
+          {/* Main Content / Empty State */}
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            {isLoading ? (
+              <Loader2 className="animate-spin text-white" size={40} />
+            ) : (
+              <>
+                <div className="w-[100px] h-[100px] border-2 border-dashed border-[#333333] rounded-full flex items-center justify-center mb-8">
+                  <CheckCircle size={56} className="text-[#333333]" />
+                </div>
+                <h2 className="text-[28px] font-[800] text-white mb-4">All Fines Settled</h2>
+                <p className="text-[14px] text-[#666666] max-w-[420px] leading-relaxed mb-10">
+                  Great job! There are no outstanding fines to display. The archive&apos;s fiscal records are currently balanced.
+                </p>
+                <div className="flex gap-4">
+                  <button className="bg-transparent border border-[#444444] text-white text-[12px] font-[600] uppercase rounded-[6px] px-[24px] py-[10px] hover:border-[#666666] transition-all">
+                    VIEW HISTORY
+                  </button>
+                  <button className="bg-white text-black text-[12px] font-[600] uppercase rounded-[6px] px-[24px] py-[10px] hover:bg-[#eeeeee] transition-all">
+                    GENERATE REPORT
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </AdminLayout>
 
         {selectedFine && (
           <FinePaymentModal 
@@ -232,3 +139,4 @@ export default function LibrarianFinesPage() {
     </ProtectedRoute>
   );
 }
+

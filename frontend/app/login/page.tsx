@@ -8,8 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import api, { ApiError } from '@/lib/api';
 import { useAuth, User } from '@/context/AuthContext';
-
-import { LogIn, Mail, Lock, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { BarChart3, Loader2 } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -17,8 +17,6 @@ const loginSchema = z.object({
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
-
-// ─── Inner component — uses useSearchParams, must be inside Suspense ──────────
 
 function LoginContent() {
   const router = useRouter();
@@ -54,108 +52,104 @@ function LoginContent() {
       const apiError = err as ApiError;
       setError((apiError.response?.data as { message?: string })?.message || 'Login failed. Please check your credentials.');
     } finally {
-
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-6 bg-[url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center relative">
-      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" />
-      
-      <div className="w-full max-w-md relative">
-        <div className="glass-dark p-8 rounded-3xl border border-white/10 shadow-2xl">
-          <div className="text-center mb-8">
-            <div className="bg-primary/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/30">
-              <LogIn className="text-primary" size={32} />
-            </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-slate-400">Log in to manage your library access</p>
+    <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-between">
+      <div className="flex-1 flex items-center justify-center w-full p-6">
+        <div className="w-full max-w-[420px] bg-[#1a1a1a] rounded-[16px] border border-[#2a2a2a] p-[48px] shadow-2xl">
+          <div className="flex flex-col items-center">
+            <BarChart3 className="text-[#555555] mb-2" size={24} />
+            <h1 className="text-[28px] font-[700] text-white leading-tight">LibraFlow</h1>
+            <p className="text-[13px] text-[#888888]">Academic Archive System</p>
+            
+            <div className="h-[32px]" />
+            
+            <h2 className="text-[20px] font-[600] text-white">Welcome Back</h2>
+            <p className="text-[14px] text-[#888888]">Access your scholarly repository</p>
+            
+            <div className="h-[24px]" />
           </div>
 
           {justRegistered && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-xl text-sm mb-6 flex items-center gap-3">
-              <CheckCircle2 size={18} />
+            <div className="bg-white/5 border border-white/10 text-white/80 px-4 py-2 rounded-[8px] text-[12px] mb-4 text-center">
               Registration successful! You can now log in.
             </div>
           )}
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl text-sm mb-6">
+            <div className="bg-white/5 border border-[#333333] text-white/70 px-4 py-2 rounded-[8px] text-[12px] mb-4 text-center">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input
-                  {...register('email')}
-                  type="email"
-                  placeholder="john@university.edu"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                />
-              </div>
-              {errors.email && <p className="text-red-500 text-xs mt-1 ml-1">{errors.email.message}</p>}
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-[16px]">
+            <div className="space-y-[8px]">
+              <label className="text-[12px] text-[#aaaaaa] uppercase tracking-wide block ml-[2px]">Email</label>
+              <input
+                {...register('email')}
+                type="email"
+                placeholder="Enter academic email"
+                className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] px-[16px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
+              />
+              {errors.email && <p className="text-[#888888] text-[11px] mt-1 ml-[2px]">{errors.email.message}</p>}
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center ml-1">
-                <label className="text-sm font-medium text-slate-300">Password</label>
-                <Link href="#" className="text-xs text-primary hover:underline">Forgot password?</Link>
+            <div className="space-y-[8px]">
+              <div className="flex justify-between items-center px-[2px]">
+                <label className="text-[12px] text-[#aaaaaa] uppercase tracking-wide">Password</label>
+                <Link href="#" className="text-[12px] text-[#888888] hover:text-white transition-colors">Forgot?</Link>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input
-                  {...register('password')}
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                />
-              </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1 ml-1">{errors.password.message}</p>}
+              <input
+                {...register('password')}
+                type="password"
+                placeholder="••••••••"
+                className="w-full h-[48px] bg-[#2a2a2a] border border-[#333333] rounded-[8px] px-[16px] text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] transition-all text-[14px]"
+              />
+              {errors.password && <p className="text-[#888888] text-[11px] mt-1 ml-[2px]">{errors.password.message}</p>}
             </div>
+
+            <div className="h-[8px]" />
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-sky-400 text-primary-foreground py-4 rounded-xl font-bold transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 group mt-4"
+              className="w-full h-[52px] bg-white text-black text-[16px] font-[500] rounded-[8px] hover:bg-[#eeeeee] transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <Loader2 className="animate-spin" size={20} />
+                <Loader2 className="animate-spin text-black" size={20} />
               ) : (
-                <>
-                  Log In
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </>
+                'Login'
               )}
             </button>
           </form>
 
-          <p className="text-center text-slate-400 mt-8">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-primary hover:underline font-medium">
-              Join LibraFlow
+          <div className="h-[24px] border-b border-[#2a2a2a] mb-[24px]" />
+
+          <p className="text-center text-[14px]">
+            <span className="text-[#888888]">Don&apos;t have an account? </span>
+            <Link href="/register" className="text-white font-[600] hover:underline">
+              Sign up
             </Link>
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
 
-// ─── Page export — wraps LoginContent in Suspense ─────────────────────────────
-
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 className="animate-spin text-primary" size={40} />
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+        <Loader2 className="animate-spin text-white" size={40} />
       </div>
     }>
       <LoginContent />
     </Suspense>
   );
 }
+

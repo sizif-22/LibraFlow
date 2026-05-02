@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Book, User, Hash, Tag, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Book } from 'lucide-react';
 import BorrowModal from '@/components/BorrowModal';
 import SuccessToast from '@/components/SuccessToast';
 
@@ -18,7 +18,6 @@ interface BookItem {
 
 interface BookCardProps {
   book: BookItem;
-  /** Pass true if the current student has an unpaid fine — disables borrow button */
   hasUnpaidFine?: boolean;
 }
 
@@ -29,14 +28,6 @@ export default function BookCard({ book, hasUnpaidFine = false }: BookCardProps)
   const isAvailable = book.available > 0;
   const canBorrow = isAvailable && !hasUnpaidFine;
 
-  const getButtonState = () => {
-    if (!isAvailable) return { label: 'Out of Stock', title: 'No copies available right now' };
-    if (hasUnpaidFine) return { label: 'Fine Pending', title: 'You have an unpaid fine — clear it to borrow' };
-    return { label: 'Borrow Now', title: '' };
-  };
-
-  const btnState = getButtonState();
-
   const handleSuccess = () => {
     setShowModal(false);
     setShowToast(true);
@@ -44,82 +35,51 @@ export default function BookCard({ book, hasUnpaidFine = false }: BookCardProps)
 
   return (
     <>
-      <div className="glass-dark rounded-2xl border border-white/10 overflow-hidden hover:border-primary/40 transition-all group hover:shadow-2xl hover:shadow-sky-500/10">
+      <div className="bg-[#111111] border border-[#222222] rounded-[12px] overflow-hidden transition-all flex flex-col h-full">
         {/* Cover area */}
-        <div className="h-48 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative overflow-hidden">
-          <Book size={80} className="text-slate-700 group-hover:text-primary/20 transition-colors" />
+        <div className="h-[200px] bg-[#1a1a1a] flex items-center justify-center relative">
+          <Book size={60} className="text-[#333333]" />
 
           {/* Availability badge */}
-          <div className="absolute top-4 right-4">
-            {isAvailable ? (
-              <div className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border border-emerald-500/30">
-                <CheckCircle size={14} />
-                Available
-              </div>
-            ) : (
-              <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border border-red-500/30">
-                <XCircle size={14} />
-                Out of Stock
-              </div>
-            )}
-          </div>
-
-          {/* Fine warning badge */}
-          {hasUnpaidFine && isAvailable && (
-            <div className="absolute top-4 left-4 bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border border-amber-500/30">
-              <AlertTriangle size={14} />
-              Fine Due
+          <div className="absolute top-4 left-4">
+            <div className={`border px-3 py-1 rounded-[20px] text-[11px] font-[500] ${
+              isAvailable 
+                ? 'border-[#444444] text-white' 
+                : 'border-[#333333] text-[#555555]'
+            }`}>
+              {isAvailable ? 'Available' : 'Out of Stock'}
             </div>
-          )}
-
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-900 to-transparent" />
+          </div>
         </div>
 
         {/* Info area */}
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="text-xl font-bold text-white line-clamp-1 group-hover:text-primary transition-colors">
-              {book.title}
-            </h3>
-          </div>
-
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <User size={16} className="text-slate-500" />
-              <span>{book.author}</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <Tag size={16} className="text-slate-500" />
-              <span>{book.category}</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <Hash size={16} className="text-slate-500" />
+        <div className="p-4 flex flex-col flex-1">
+          <span className="text-[10px] text-[#666666] uppercase tracking-wider font-[600]">
+            {book.category}
+          </span>
+          <h3 className="text-[16px] font-[700] text-white mt-1 line-clamp-1">
+            {book.title}
+          </h3>
+          <p className="text-[13px] text-[#888888] italic mt-1 line-clamp-1">
+            {book.author}
+          </p>
+          
+          <div className="mt-auto pt-3 flex flex-col gap-1">
+            <div className="flex justify-between text-[11px] text-[#555555]">
               <span>ISBN: {book.isbn}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-white/5">
-            <div className="text-xs text-slate-500">
-              Available:{' '}
-              <span className={isAvailable ? 'text-emerald-400' : 'text-red-400'}>
-                {book.available}
-              </span>{' '}
-              / {book.quantity}
+              <span>Available: {book.available}/{book.quantity}</span>
             </div>
 
             <button
               onClick={() => canBorrow && setShowModal(true)}
               disabled={!canBorrow}
-              title={btnState.title}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              className={`w-full h-[40px] rounded-[6px] text-[12px] font-[600] uppercase tracking-wide mt-3 transition-all ${
                 canBorrow
-                  ? 'bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground cursor-pointer'
-                  : hasUnpaidFine && isAvailable
-                  ? 'bg-amber-500/10 text-amber-600 cursor-not-allowed'
-                  : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                  ? 'bg-white text-black hover:bg-[#eeeeee]'
+                  : 'bg-[#1a1a1a] text-[#444444] cursor-not-allowed border border-[#222222]'
               }`}
             >
-              {btnState.label}
+              {hasUnpaidFine && isAvailable ? 'Fine Pending' : isAvailable ? 'Borrow Now' : 'Out of Stock'}
             </button>
           </div>
         </div>

@@ -1,133 +1,137 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
-import { Zap, ArrowRight, Library, Bell, DollarSign, BarChart3 } from 'lucide-react';
+import { Search, Globe, Clock, Shield, Circle, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const { user } = useAuth();
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)] bg-slate-950">
+    <div className="flex flex-col bg-[#000000] min-h-screen">
       {/* Hero Section */}
-      <div className="relative pt-24 pb-32 overflow-hidden">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
-          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] translate-x-1/2" />
+      <section className="pt-32 pb-24 px-10 text-center flex flex-col items-center">
+        <h1 className="text-[56px] font-[800] tracking-tight leading-tight flex flex-col">
+          <span className="text-white">Modern Library</span>
+          <span className="text-[#555555]">Intelligence.</span>
+        </h1>
+        <p className="text-[16px] text-[#888888] mt-8 max-w-[500px] leading-relaxed">
+          Access the world&apos;s most comprehensive academic archive with an interface designed for deep focus and scholarly rigor. Research, borrow, and track with precision.
+        </p>
+        <div className="flex items-center gap-4 mt-12">
+          <Link
+            href="/books"
+            className="text-[13px] font-[500] uppercase tracking-wider bg-transparent border border-white text-white px-[28px] py-[12px] rounded-[6px] hover:bg-white hover:text-black transition-all flex items-center gap-2"
+          >
+            EXPLORE CATALOG <ArrowRight size={14} />
+          </Link>
+          <Link
+            href="/books"
+            className="text-[13px] font-[500] uppercase tracking-wider bg-transparent border border-[#444444] text-[#888888] px-[28px] py-[12px] rounded-[6px] hover:border-[#666666] hover:text-white transition-all"
+          >
+            BROWSE BOOKS
+          </Link>
         </div>
+      </section>
 
-        <div className="max-w-7xl mx-auto px-6 relative">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-sky-500/10 text-sky-400 px-4 py-2 rounded-full text-sm font-semibold mb-8 border border-sky-500/20 animate-pulse">
-              <Zap size={16} />
-              Sprint 3 Live: Fines & Admin Intelligence
-            </div>
-            <h1 className="text-6xl md:text-7xl font-black text-white mb-8 tracking-tight">
-              Modern Library <span className="text-primary">Intelligence.</span>
-            </h1>
-            <p className="text-xl text-slate-400 mb-12 leading-relaxed">
-              Automated fine calculations, real-time student notifications, 
-              and powerful administrative analytics in one beautiful workspace.
+      {/* Stats Bar */}
+      <section className="bg-[#111111] border-y border-[#222222] py-[32px] px-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="flex flex-col items-center lg:items-start">
+            <span className="text-[36px] font-[800] text-white tracking-tight">1.2M</span>
+            <span className="text-[11px] text-[#666666] uppercase tracking-[0.15em] font-[500] mt-1">TOTAL VOLUMES</span>
+          </div>
+          <div className="flex flex-col items-center lg:items-start">
+            <span className="text-[36px] font-[800] text-white tracking-tight">45k</span>
+            <span className="text-[11px] text-[#666666] uppercase tracking-[0.15em] font-[500] mt-1">DIGITAL JOURNALS</span>
+          </div>
+          <div className="flex flex-col items-center lg:items-start">
+            <span className="text-[36px] font-[800] text-white tracking-tight">24/7</span>
+            <span className="text-[11px] text-[#666666] uppercase tracking-[0.15em] font-[500] mt-1">SYSTEM UPTIME</span>
+          </div>
+          <div className="flex flex-col items-center lg:items-start">
+            <span className="text-[36px] font-[800] text-white tracking-tight">100%</span>
+            <span className="text-[11px] text-[#666666] uppercase tracking-[0.15em] font-[500] mt-1">ACADEMIC PRECISION</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Cards Grid */}
+      <section className="py-32 px-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[28px] hover:border-[#444444] transition-all">
+            <Search size={20} className="text-[#888888]" />
+            <h3 className="text-[18px] font-[700] text-white mt-[20px]">Advanced Search</h3>
+            <p className="text-[14px] text-[#666666] leading-relaxed mt-[8px]">
+              Utilize Boolean logic and deep metadata filtering to find exactly what your thesis requires.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href={user ? (user.role === 'ADMIN' ? "/admin/dashboard" : (user.role === 'LIBRARIAN' ? "/librarian/dashboard" : "/books")) : "/register"}
-                className="w-full sm:w-auto bg-primary hover:bg-sky-400 text-primary-foreground px-10 py-5 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2 group"
-              >
-                {user ? (user.role === 'ADMIN' ? 'Admin Dashboard' : (user.role === 'LIBRARIAN' ? 'Staff Dashboard' : 'Explore Catalog')) : 'Get Started'}
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-              {(!user || user.role === 'STUDENT') && (
-                <Link
-                  href="/books"
-                  className="w-full sm:w-auto bg-white/5 hover:bg-white/10 text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all border border-white/10 flex items-center justify-center gap-2"
-                >
-                  Browse Books
-                </Link>
-              )}
-            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Features Grid */}
-      <section className="py-24 px-6 border-t border-white/5 bg-slate-900/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
-              <div className="bg-sky-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-sky-500/30 group-hover:scale-110 transition-transform">
-                <Bell className="text-sky-400" size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Live Alerts</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Stay informed with instant in-app notifications for approvals, 
-                rejections, and upcoming due dates.
-              </p>
-            </div>
-
-            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
-              <div className="bg-amber-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-amber-500/30 group-hover:scale-110 transition-transform">
-                <DollarSign className="text-amber-400" size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Fair Fines</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Automated fine calculation using pluggable strategies 
-                ensuring fair and transparent late fees.
-              </p>
-            </div>
-
-            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
-              <div className="bg-indigo-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30 group-hover:scale-110 transition-transform">
-                <BarChart3 className="text-indigo-400" size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Admin Intelligence</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Comprehensive dashboards for admins to track system health, 
-                user roles, and overdue trends.
-              </p>
-            </div>
-
-            <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
-              <div className="bg-emerald-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/30 group-hover:scale-110 transition-transform">
-                <Library className="text-emerald-400" size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Unified Catalog</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Centralized access to books, magazines, and theses 
-                with high-speed digital workflows.
-              </p>
-            </div>
+          <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[28px] hover:border-[#444444] transition-all">
+            <Globe size={20} className="text-[#888888]" />
+            <h3 className="text-[18px] font-[700] text-white mt-[20px]">Digital Archive</h3>
+            <p className="text-[14px] text-[#666666] leading-relaxed mt-[8px]">
+              Instant access to high-resolution scans of rare manuscripts and contemporary journals.
+            </p>
+          </div>
+          <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[28px] hover:border-[#444444] transition-all">
+            <Clock size={20} className="text-[#888888]" />
+            <h3 className="text-[18px] font-[700] text-white mt-[20px]">Borrowing History</h3>
+            <p className="text-[14px] text-[#666666] leading-relaxed mt-[8px]">
+              Track your intellectual journey with detailed records of every resource you&apos;ve accessed.
+            </p>
+          </div>
+          <div className="bg-[#111111] border border-[#222222] rounded-[12px] p-[28px] hover:border-[#444444] transition-all">
+            <Shield size={20} className="text-[#888888]" />
+            <h3 className="text-[18px] font-[700] text-white mt-[20px]">Smart Reservations</h3>
+            <p className="text-[14px] text-[#666666] leading-relaxed mt-[8px]">
+              Automated queue management and notification systems for high-demand academic materials.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-7xl mx-auto glass-dark rounded-[40px] p-12 border border-white/10 overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2" />
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative">
-            <div className="text-center">
-              <div className="text-5xl font-black text-white mb-2">31</div>
-              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">User Stories</div>
+      {/* Two-Column Section */}
+      <section className="pb-32 px-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="relative rounded-[12px] overflow-hidden aspect-video bg-[#1a1a1a]">
+            <img 
+              src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2000&auto=format&fit=crop" 
+              alt="Library Hall" 
+              className="w-full h-full object-cover opacity-60"
+            />
+            <div className="absolute bottom-6 left-6 bg-[#000000] border border-[#333333] px-4 py-2 rounded-full text-white text-[11px] font-[600] uppercase tracking-wider">
+              CURATED COLLECTIONS
             </div>
-            <div className="text-center">
-              <div className="text-5xl font-black text-primary mb-2">0</div>
-              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">Manual Paperwork</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl font-black text-white mb-2">100%</div>
-              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">Digital Returns</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl font-black text-primary mb-2">S3</div>
-              <div className="text-slate-500 text-xs uppercase tracking-widest font-bold">Milestone Reached</div>
-            </div>
+          </div>
+          <div>
+            <h2 className="text-[32px] font-[800] text-white leading-tight">
+              Designed for Researchers, by Researchers.
+            </h2>
+            <p className="text-[15px] text-[#888888] mt-6 leading-loose">
+              LibraFlow eliminates the friction of traditional library systems. Our architecture is built to support long-form research and quick citation retrieval with equal efficiency.
+            </p>
+            <ul className="mt-8 space-y-4">
+              <li className="flex items-center gap-3 text-[14px] text-[#aaaaaa]">
+                <Circle size={8} fill="#555555" className="text-[#555555]" />
+                Direct API integration with university databases
+              </li>
+              <li className="flex items-center gap-3 text-[14px] text-[#aaaaaa]">
+                <Circle size={8} fill="#555555" className="text-[#555555]" />
+                Personalized scholarship recommendations
+              </li>
+              <li className="flex items-center gap-3 text-[14px] text-[#aaaaaa]">
+                <Circle size={8} fill="#555555" className="text-[#555555]" />
+                Cross-institutional borrowing permissions
+              </li>
+            </ul>
           </div>
         </div>
       </section>
 
+      <Footer />
     </div>
   );
 }
+
