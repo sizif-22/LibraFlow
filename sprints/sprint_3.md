@@ -8,28 +8,28 @@
 
 ## Sprint Goal
 
-> *"By the end of Sprint 3, the system automatically calculates fines using the Strategy Pattern, sends in-app notifications for borrow events, and admins have full visibility into users and reports."*
+> _"By the end of Sprint 3, the system automatically calculates fines using the Strategy Pattern, sends in-app notifications for borrow events, and admins have full visibility into users and reports."_
 
 ---
 
 ## Sprint 3 Backlog
 
-| Story ID | User Story | Points | Assigned To |
-|---|---|---|---|
-| US-20 | As a system, I want to automatically calculate fines when a book is returned late using a pluggable strategy | 3 | Backend |
-| US-21 | As a librarian, I want to choose the fine calculation strategy so I can apply the right rules | 2 | Backend |
-| US-22 | As a librarian, I want to record a fine payment so the student's account gets unblocked | 2 | Backend |
-| US-23 | As a student, I want to see my outstanding fines on my dashboard so I know what I owe | 2 | Frontend |
-| US-24 | As a system, I want to send an in-app notification when a borrow is approved, rejected, or returned | 3 | Backend |
-| US-25 | As a system, I want to send a reminder notification 1 day before the due date | 2 | Backend |
-| US-26 | As a student, I want to see my notifications in a bell icon so I stay informed | 3 | Frontend |
-| US-27 | As an admin, I want to view all users and change their roles so I can manage access | 2 | Backend |
-| US-28 | As an admin, I want to deactivate or reactivate a student account | 2 | Backend |
-| US-29 | As an admin, I want to see a report of the most borrowed books | 2 | Backend |
-| US-30 | As an admin, I want to see a report of all overdue borrows | 2 | Backend |
-| US-31 | As an admin, I want to see the total fines collected | 1 | Backend |
-| US-32 | As an admin, I want an admin dashboard showing all reports and user management | 3 | Frontend |
-| US-33 | As a librarian, I want a fines management page to view and record payments | 2 | Frontend |
+| Story ID | User Story                                                                                                   | Points | Assigned To |
+| -------- | ------------------------------------------------------------------------------------------------------------ | ------ | ----------- |
+| US-20    | As a system, I want to automatically calculate fines when a book is returned late using a pluggable strategy | 3      | Backend     |
+| US-21    | As a librarian, I want to choose the fine calculation strategy so I can apply the right rules                | 2      | Backend     |
+| US-22    | As a librarian, I want to record a fine payment so the student's account gets unblocked                      | 2      | Backend     |
+| US-23    | As a student, I want to see my outstanding fines on my dashboard so I know what I owe                        | 2      | Frontend    |
+| US-24    | As a system, I want to send an in-app notification when a borrow is approved, rejected, or returned          | 3      | Backend     |
+| US-25    | As a system, I want to send a reminder notification 1 day before the due date                                | 2      | Backend     |
+| US-26    | As a student, I want to see my notifications in a bell icon so I stay informed                               | 3      | Frontend    |
+| US-27    | As an admin, I want to view all users and change their roles so I can manage access                          | 2      | Backend     |
+| US-28    | As an admin, I want to deactivate or reactivate a student account                                            | 2      | Backend     |
+| US-29    | As an admin, I want to see a report of the most borrowed books                                               | 2      | Backend     |
+| US-30    | As an admin, I want to see a report of all overdue borrows                                                   | 2      | Backend     |
+| US-31    | As an admin, I want to see the total fines collected                                                         | 1      | Backend     |
+| US-32    | As an admin, I want an admin dashboard showing all reports and user management                               | 3      | Frontend    |
+| US-33    | As a librarian, I want a fines management page to view and record payments                                   | 2      | Frontend    |
 
 **Total Points: 31**
 
@@ -171,13 +171,13 @@ backend/src/
 ```typescript
 // IFineStrategy.ts
 interface IFineStrategy {
-  calculate(overdueDays: number, bookPrice?: number): number
+  calculate(overdueDays: number, bookPrice?: number): number;
 }
 
 // PerDayFine.ts
 class PerDayFine implements IFineStrategy {
   calculate(overdueDays: number): number {
-    return overdueDays * 5
+    return overdueDays * 5;
   }
 }
 
@@ -186,11 +186,11 @@ class FineCalculator {
   constructor(private strategy: IFineStrategy) {}
 
   setStrategy(strategy: IFineStrategy) {
-    this.strategy = strategy
+    this.strategy = strategy;
   }
 
   calculate(overdueDays: number, bookPrice?: number): number {
-    return this.strategy.calculate(overdueDays, bookPrice)
+    return this.strategy.calculate(overdueDays, bookPrice);
   }
 }
 ```
@@ -200,28 +200,31 @@ class FineCalculator {
 ## API Endpoints — Sprint 3
 
 ### Fines
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| POST | `/api/fines/calculate` | ✅ | System | Auto calculate fine on return |
-| GET | `/api/fines/my` | ✅ | Student | View my fines |
-| GET | `/api/fines` | ✅ | Librarian | View all fines |
-| PUT | `/api/fines/:id/pay` | ✅ | Librarian | Record fine payment |
+
+| Method | Endpoint               | Auth | Role      | Description                   |
+| ------ | ---------------------- | ---- | --------- | ----------------------------- |
+| POST   | `/api/fines/calculate` | ✅   | System    | Auto calculate fine on return |
+| GET    | `/api/fines/my`        | ✅   | Student   | View my fines                 |
+| GET    | `/api/fines`           | ✅   | Librarian | View all fines                |
+| PUT    | `/api/fines/:id/pay`   | ✅   | Librarian | Record fine payment           |
 
 ### Notifications
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| GET | `/api/notifications/my` | ✅ | Student | View my notifications |
-| PUT | `/api/notifications/:id/read` | ✅ | Student | Mark notification as read |
+
+| Method | Endpoint                      | Auth | Role    | Description               |
+| ------ | ----------------------------- | ---- | ------- | ------------------------- |
+| GET    | `/api/notifications/my`       | ✅   | Student | View my notifications     |
+| PUT    | `/api/notifications/:id/read` | ✅   | Student | Mark notification as read |
 
 ### Admin
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| GET | `/api/admin/users` | ✅ | Admin | List all users |
-| PUT | `/api/admin/users/:id/role` | ✅ | Admin | Change user role |
-| PUT | `/api/admin/users/:id/status` | ✅ | Admin | Activate/Deactivate user |
-| GET | `/api/admin/reports/top-books` | ✅ | Admin | Most borrowed books |
-| GET | `/api/admin/reports/overdue` | ✅ | Admin | Overdue borrows |
-| GET | `/api/admin/reports/fines` | ✅ | Admin | Total fines collected |
+
+| Method | Endpoint                       | Auth | Role  | Description              |
+| ------ | ------------------------------ | ---- | ----- | ------------------------ |
+| GET    | `/api/admin/users`             | ✅   | Admin | List all users           |
+| PUT    | `/api/admin/users/:id/role`    | ✅   | Admin | Change user role         |
+| PUT    | `/api/admin/users/:id/status`  | ✅   | Admin | Activate/Deactivate user |
+| GET    | `/api/admin/reports/top-books` | ✅   | Admin | Most borrowed books      |
+| GET    | `/api/admin/reports/overdue`   | ✅   | Admin | Overdue borrows          |
+| GET    | `/api/admin/reports/fines`     | ✅   | Admin | Total fines collected    |
 
 ---
 
@@ -239,6 +242,7 @@ develop
 ## Sprint 3 — Definition of Done
 
 A story is **Done** when:
+
 - [ ] Code is written and works locally
 - [ ] Strategy Pattern used for fine calculation (no hardcoded logic)
 - [ ] Repository Pattern used for all DB operations
@@ -250,5 +254,5 @@ A story is **Done** when:
 
 ---
 
-*Document maintained by: Product Owner — Sherif*
-*Last updated: April 2026*
+_Document maintained by: Product Owner — Sherif_
+_Last updated: April 2026_
