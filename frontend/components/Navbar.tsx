@@ -1,9 +1,9 @@
 'use client';
-
-import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Library, LogIn, LogOut, UserPlus, BookOpen, Settings, BookMarked, ClipboardList, RotateCcw } from 'lucide-react';
+import { Library, LogIn, LogOut, UserPlus, BookOpen, Settings, BookMarked, ClipboardList, RotateCcw, LayoutDashboard, DollarSign } from 'lucide-react';
+import NotificationBell from './NotificationBell';
+
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -47,13 +47,26 @@ export default function Navbar() {
                 <RotateCcw size={18} />
                 Returns
               </Link>
+              <Link href="/librarian/fines" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                <DollarSign size={18} />
+                Fines
+              </Link>
             </>
+          )}
+
+          {user && user.role === 'ADMIN' && (
+            <Link href="/admin/dashboard" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+              <LayoutDashboard size={18} />
+              Dashboard
+            </Link>
           )}
 
           <div className="h-6 w-px bg-white/10 mx-2" />
 
           {user ? (
             <div className="flex items-center gap-4">
+              {user.role === 'STUDENT' && <NotificationBell />}
+              
               <span className="text-slate-400 text-sm hidden md:inline">
                 Welcome, <span className="text-white font-medium">{user.name}</span>
               </span>
@@ -65,6 +78,7 @@ export default function Navbar() {
                 <span>Logout</span>
               </button>
             </div>
+
           ) : (
             <div className="flex items-center gap-4">
               <Link href="/login" className="text-slate-300 hover:text-white transition-colors flex items-center gap-2">

@@ -7,7 +7,10 @@ import { Borrow, BorrowStatus } from '@/lib/types/borrow';
 import {
   BookOpen, Clock, CheckCircle, XCircle, RefreshCw,
   Loader2, Calendar, Tag, AlertTriangle, BookMarked,
-} from 'lucide-react';
+  DollarSign} from 'lucide-react';
+import { finesApi } from '@/lib/api/fines';
+import { Fine } from '@/lib/types/fine';
+
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -67,7 +70,7 @@ function BorrowRow({ borrow }: { borrow: Borrow }) {
     <div className="glass-dark rounded-2xl border border-white/5 hover:border-white/10 p-5 transition-all group">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         {/* Book icon */}
-        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
           <BookOpen size={22} className="text-slate-500 group-hover:text-primary transition-colors" />
         </div>
 
@@ -103,7 +106,7 @@ function BorrowRow({ borrow }: { borrow: Borrow }) {
         </div>
 
         {/* Status badge */}
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border flex-shrink-0
+        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shrink-0
           ${cfg.color} ${cfg.bg} ${cfg.border}`}
         >
           <Icon size={12} />
@@ -116,20 +119,25 @@ function BorrowRow({ borrow }: { borrow: Borrow }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'active' | 'past';
+type Tab = 'active' | 'past' | 'fines';
 
 export default function StudentBorrowsPage() {
   const [borrows, setBorrows] = useState<Borrow[]>([]);
+  const [fines, setFines] = useState<Fine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('active');
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await getMyBorrows();
-        setBorrows(data);
+        const [borrowsData, finesData] = await Promise.all([
+          getMyBorrows(),
+          finesApi.getMyFines()
+        ]);
+        setBorrows(borrowsData);
+        setFines(finesData);
       } catch (err) {
-        console.error('Failed to load borrow history:', err);
+        console.error('Failed to load dashboard data:', err);
       } finally {
         setIsLoading(false);
       }
@@ -143,7 +151,12 @@ export default function StudentBorrowsPage() {
     (b) => b.status === BorrowStatus.RETURNED || b.status === BorrowStatus.REJECTED,
   );
 
+  const unpaidFines = fines.filter(f => !f.isPaid);
+  const totalFines = unpaidFines.reduce((sum, f) => sum + f.amount, 0);
+
   const displayed = activeTab === 'active' ? activeBorrows : pastBorrows;
+
+
 
   // Count overdue
   const overdueCount = activeBorrows.filter(
@@ -184,7 +197,7 @@ export default function StudentBorrowsPage() {
 
           {/* Tabs */}
           <div className="flex gap-1 bg-white/5 border border-white/5 p-1 rounded-2xl mb-6">
-            {([['active', 'Active & Pending'], ['past', 'History']] as const).map(([tab, label]) => (
+            {([['active', 'Active'], ['past', 'History'], ['fines', 'Fines']] as const).map(([tab, label]) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -197,7 +210,7 @@ export default function StudentBorrowsPage() {
                 {label}
                 <span className={`ml-2 px-2 py-0.5 rounded-full text-xs
                   ${activeTab === tab ? 'bg-primary-foreground/20' : 'bg-white/10'}`}>
-                  {tab === 'active' ? activeBorrows.length : pastBorrows.length}
+                  {tab === 'active' ? activeBorrows.length : tab === 'past' ? pastBorrows.length : fines.length}
                 </span>
               </button>
             ))}
@@ -207,7 +220,58 @@ export default function StudentBorrowsPage() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-24 gap-3">
               <Loader2 className="animate-spin text-primary" size={40} />
-              <p className="text-slate-500 text-sm">Loading your borrows...</p>
+              <p className="text-slate-500 text-sm">Loading your dashboard...</p>
+            </div>
+          ) : activeTab === 'fines' ? (
+            <div className="space-y-6">
+              {/* Total Owed Card */}
+              <div className="glass-dark rounded-2xl border border-white/10 p-6 flex items-center justify-between bg-linear-to-br from-amber-500/5 to-transparent">
+                <div>
+                  <h3 className="text-slate-400 text-sm font-medium">Total Amount Owed</h3>
+                  <div className="text-4xl font-bold text-white mt-1 flex items-baseline gap-1">
+                    {totalFines} <span className="text-lg text-slate-500 font-normal">EGP</span>
+                  </div>
+                </div>
+                <div className="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
+                  <DollarSign size={32} className="text-amber-400" />
+                </div>
+              </div>
+
+              {fines.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="bg-white/5 p-5 rounded-full mb-5 border border-white/10 text-emerald-500">
+                    <CheckCircle size={48} />
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-2">No Fines</h2>
+                  <p className="text-slate-500 text-sm">Your account is in good standing!</p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {fines.map((fine) => (
+                    <div key={fine.id} className="glass-dark rounded-2xl border border-white/5 p-5 flex items-center justify-between group">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${fine.isPaid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'}`}>
+                          {fine.isPaid ? <CheckCircle size={20} /> : <DollarSign size={20} />}
+                        </div>
+                        <div>
+                          <h4 className="text-white font-semibold">{fine.borrow?.book?.title ?? 'Library Fine'}</h4>
+                          <p className="text-slate-500 text-xs mt-0.5">
+                            Added on {fmt(fine.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-lg font-bold ${fine.isPaid ? 'text-emerald-400 line-through opacity-50' : 'text-white'}`}>
+                          {fine.amount} EGP
+                        </div>
+                        <div className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${fine.isPaid ? 'text-emerald-500' : 'text-amber-500'}`}>
+                          {fine.isPaid ? `Paid on ${fmt(fine.paidAt)}` : 'Outstanding'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : displayed.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -230,6 +294,7 @@ export default function StudentBorrowsPage() {
               ))}
             </div>
           )}
+
         </div>
       </div>
     </ProtectedRoute>
