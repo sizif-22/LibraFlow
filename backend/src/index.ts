@@ -4,6 +4,7 @@ import { swagger } from '@elysiajs/swagger'
 import { authController } from './controllers/auth.controller'
 import { bookController } from './controllers/book.controller'
 import { borrowController } from './controllers/borrow.controller'
+import { fineController } from './controllers/fine.controller'
 
 const app = new Elysia()
     .use(cors())
@@ -17,7 +18,8 @@ const app = new Elysia()
             tags: [
                 { name: 'Auth',   description: 'Authentication endpoints' },
                 { name: 'Books',  description: 'Book management endpoints' },
-                { name: 'Borrows', description: 'Borrowing system endpoints' }
+                { name: 'Borrows', description: 'Borrowing system endpoints' },
+                { name: 'Fines',   description: 'Fine calculation and management endpoints' }
             ]
         }
     }))
@@ -27,6 +29,7 @@ const app = new Elysia()
             .use(authController)
             .use(bookController)
             .use(borrowController)
+            .use(fineController)
     )
     .onError(({ code, error, set }) => {
         if (code === 'NOT_FOUND') {

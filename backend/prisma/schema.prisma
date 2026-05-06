@@ -39,8 +39,9 @@ model User {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  borrows   Borrow[]
-  fines     Fine[]
+  borrows       Borrow[]
+  fines         Fine[]
+  notifications Notification[]
 }
 
 model Book {
@@ -51,6 +52,7 @@ model Book {
   category  String
   quantity  Int
   available Int
+  price     Float    @default(100)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -83,6 +85,24 @@ model Fine {
   studentId Int
   amount    Float    @default(0)
   isPaid    Boolean  @default(false)
+  paidAt    DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId Int
+  message   String
+  type      NotificationType
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum NotificationType {
+  BORROW_APPROVED
+  BORROW_REJECTED
+  FINE_ADDED
+  DUE_REMINDER
 }
