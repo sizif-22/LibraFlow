@@ -8,7 +8,7 @@ const borrowWithRelations = {
         select: { id: true, name: true, email: true, role: true },
     },
     book: {
-        select: { id: true, title: true, author: true, isbn: true, category: true },
+        select: { id: true, title: true, author: true, isbn: true, category: true, type: true },
     },
     fine: true,
 } as const
@@ -48,12 +48,29 @@ export const BorrowRepository = {
         })
     },
 
+    /** All borrows in the system — for stats. */
+    async findAll() {
+        return prisma.borrow.findMany({
+            include: borrowWithRelations,
+            orderBy: { createdAt: 'desc' },
+        })
+    },
+
     /** All borrows currently in PENDING status — for the librarian dashboard. */
     async findAllPending() {
         return prisma.borrow.findMany({
             where: { status: BorrowStatus.PENDING },
             include: borrowWithRelations,
             orderBy: { createdAt: 'asc' }, // oldest first → FIFO
+        })
+    },
+
+    /** All borrows currently in APPROVED status — for the librarian returns page. */
+    async findAllActive() {
+        return prisma.borrow.findMany({
+            where: { status: BorrowStatus.APPROVED },
+            include: borrowWithRelations,
+            orderBy: { dueDate: 'asc' }, 
         })
     },
 

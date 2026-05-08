@@ -1,14 +1,19 @@
 import { Elysia, t } from 'elysia'
 import { NotificationService } from '../services/notification.service'
-import { authMiddleware } from '../middlewares/auth.middleware'
 
 export const notificationController = new Elysia({ prefix: '/notifications' })
-    .use(authMiddleware)
     .get(
         '/my',
-        async ({ user }: any) => {
-            return await NotificationService.getMyNotifications(user.id)
+        async ({ user, set }: any) => {
+            try {
+                const notifications = await NotificationService.getMyNotifications(user.id)
+                return { notifications, total: notifications.length }
+            } catch (e: any) {
+                set.status = 500
+                return { message: e.message || 'Failed to fetch notifications' }
+            }
         },
+
         {
             isAuth: true,
             detail: {
@@ -19,8 +24,13 @@ export const notificationController = new Elysia({ prefix: '/notifications' })
     )
     .put(
         '/:id/read',
-        async ({ params: { id } }: any) => {
-            return await NotificationService.markAsRead(parseInt(id))
+        async ({ params: { id }, set }: any) => {
+            try {
+                return await NotificationService.markAsRead(parseInt(id))
+            } catch (e: any) {
+                set.status = 400
+                return { message: e.message || 'Failed to mark notification as read' }
+            }
         },
         {
             isAuth: true,

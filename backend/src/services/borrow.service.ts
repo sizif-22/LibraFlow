@@ -23,7 +23,7 @@ export const BorrowService = {
      *  - Student doesn't already have an active approved borrow for this book
      *  - Student has no unpaid fines (US-19)
      */
-    async requestBorrow(studentId: number, bookId: number, type: BorrowType) {
+    async requestBorrow(studentId: number, bookId: number) {
         // 1. Load book
         const book = await prisma.book.findUnique({ where: { id: bookId } })
         if (!book) {
@@ -45,8 +45,8 @@ export const BorrowService = {
             throw new Error('You already have an active borrow for this book')
         }
 
-        // 4. Create borrow record in PENDING status
-        return BorrowRepository.create(studentId, bookId, type)
+        // 4. Create borrow record in PENDING status using the book's inherent type
+        return BorrowRepository.create(studentId, bookId, book.type as BorrowType)
     },
 
     /**
@@ -177,6 +177,20 @@ export const BorrowService = {
         ])
 
         return updatedBorrow
+    },
+
+    /**
+     * Librarian views all borrow requests (for stats).
+     */
+    async getAllBorrows() {
+        return BorrowRepository.findAll()
+    },
+
+    /**
+     * Librarian views all active (approved) borrow requests.
+     */
+    async getActiveBorrows() {
+        return BorrowRepository.findAllActive()
     },
 
     /**

@@ -1,5 +1,5 @@
 import { NotificationRepository } from '../repositories/NotificationRepository'
-import { BorrowRepository } from '../repositories/BorrowRepository copy'
+import { BorrowRepository } from '../repositories/BorrowRepository'
 import { NotificationType } from '@prisma/client'
 
 export const NotificationService = {
@@ -14,7 +14,7 @@ export const NotificationService = {
     async triggerDueReminders() {
         // Find all borrows due exactly tomorrow
         const dueTomorrow = await BorrowRepository.findDueTomorrow()
-
+        
         const notifications = []
         for (const borrow of dueTomorrow) {
             const message = `Reminder: The book "${borrow.book.title}" is due tomorrow.`

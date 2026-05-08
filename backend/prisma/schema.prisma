@@ -50,6 +50,7 @@ model Book {
   author    String
   isbn      String   @unique
   category  String
+  type      BorrowType @default(BOOK)
   quantity  Int
   available Int
   price     Float    @default(100)

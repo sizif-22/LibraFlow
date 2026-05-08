@@ -9,29 +9,49 @@ export const authMiddleware = new Elysia()
             secret: process.env.JWT_SECRET || 'libraflow-secret-key-change-me-in-production'
         })
     )
-    .derive(async ({ jwt, headers: { authorization } }) => {
-        if (!authorization) return { user: null }
+    .onBeforeHandle(() => {
+        if (!process.env.JWT_SECRET) {
+            console.error('[AuthMiddleware] WARNING: JWT_SECRET is NOT set in environment variables! Using default fallback.');
+        }
+    })
+
+    .derive(async ({ jwt, headers, path }) => {
+        const authorization = headers['authorization'];
+        console.log(`[AuthMiddleware] Request to ${path}. Auth header: ${authorization ? 'Present' : 'Missing'}`);
+        
+        if (!authorization) {
+            return { user: null };
+        }
 
         const token = authorization.startsWith('Bearer ') 
             ? authorization.slice(7) 
             : authorization
 
+        console.log(`[AuthMiddleware] Verifying token: ${token.substring(0, 10)}...`);
         const profile = await jwt.verify(token) as AuthUser | false
-        if (!profile) return { user: null }
+        
+        if (!profile) {
+            console.log('[AuthMiddleware] Verification FAILED');
+            return { user: null };
+        }
 
+        console.log('[AuthMiddleware] Verification SUCCESS for:', profile.email);
         return {
             user: profile as AuthUser
         }
     })
+
+
     .macro(({ onBeforeHandle }) => ({
         isAuth(value: boolean) {
-            onBeforeHandle(({ user, error }: { user: AuthUser | null, error: any }) => {
+            onBeforeHandle(({ user, set }: { user: AuthUser | null, set: any }) => {
                 if (value && !user) {
-                    return error(401, {
-                        status: 401,
+                    set.status = 401;
+                    return {
                         message: 'Unauthorized: You must be logged in to access this resource'
-                    })
+                    }
                 }
             })
+
         }
     }))

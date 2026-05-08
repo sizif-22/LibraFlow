@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Geist } from "next/font/google";
 import "./globals.css";
+import "lenis/dist/lenis.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
+import SmoothScroll from "@/components/SmoothScroll";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,20 +22,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} antialiased selection:bg-sky-500/30`}>
+    <html lang="en" className={cn("bg-black", "font-sans", geist.variable)}>
+      <body 
+        className={`${inter.className} antialiased bg-black text-white`}
+        suppressHydrationWarning
+      >
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
-            <footer className="py-8 px-6 border-t border-white/5 text-center text-slate-500 text-sm">
-              <p>&copy; 2026 LibraFlow Team. All rights reserved.</p>
-            </footer>
-          </div>
+          <SmoothScroll>
+            <div className="min-h-screen flex flex-col bg-black">
+              <Navbar />
+              <main className="flex-1 flex flex-col">
+                {children}
+              </main>
+            </div>
+          </SmoothScroll>
         </AuthProvider>
       </body>
     </html>
   );
 }
+

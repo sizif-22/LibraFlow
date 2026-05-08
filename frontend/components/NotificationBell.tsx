@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, Loader2, Info, AlertCircle, Calendar, DollarSign } from 'lucide-react';
 import { notificationsApi } from '@/lib/api/notifications';
+import { useAuth } from '@/context/AuthContext';
+
 import { Notification, NotificationType } from '@/lib/types/notification';
 
 const NOTIFICATION_ICONS: Record<NotificationType, { icon: React.ElementType; color: string; bg: string }> = {
@@ -20,11 +22,16 @@ export default function NotificationBell() {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
+  const { token } = useAuth();
+
   useEffect(() => {
+    if (!token) return;
+    
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60000); // Refresh every minute
     return () => clearInterval(interval);
-  }, []);
+  }, [token]);
+
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,11 +47,15 @@ export default function NotificationBell() {
     try {
       const data = await notificationsApi.getMyNotifications();
       setNotifications(data);
-    } catch (err) {
-      console.error('Failed to fetch notifications:', err);
+    } catch (err: any) {
+      // If it's a 401, the global api interceptor will handle it via 'auth-error' event
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch notifications:', err);
+      }
     } finally {
       setIsLoading(false);
     }
+
   };
 
   const handleMarkAsRead = async (id: number) => {

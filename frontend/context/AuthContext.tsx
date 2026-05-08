@@ -1,14 +1,15 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
-interface User {
+
+export interface User {
   id: number;
   name: string;
   email: string;
   role: 'STUDENT' | 'LIBRARIAN' | 'ADMIN';
 }
+
 
 interface AuthContextType {
   user: User | null;
@@ -21,41 +22,96 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [authState, setAuthState] = useState<{
+    user: User | null;
+    token: string | null;
+    isLoading: boolean;
+  }>({
+    user: null,
+    token: null,
+    isLoading: true,
+  });
+
+  const logout = React.useCallback(() => {
+    setAuthState({
+      token: null,
+      user: null,
+      isLoading: false,
+    });
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }, []);
+
+  const login = React.useCallback((newToken: string, newUser: User) => {
+    console.log('Login function called. Setting token and user.');
+    setAuthState({
+      token: newToken,
+      user: newUser,
+      isLoading: false,
+    });
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
+  }, []);
+
+
+  const currentTokenRef = React.useRef<string | null>(null);
+  
+  useEffect(() => {
+    currentTokenRef.current = authState.token;
+  }, [authState.token]);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleAuthError = (event: any) => {
+      const failingToken = event.detail?.token;
+      if (failingToken && failingToken === currentTokenRef.current) {
+        logout();
+      }
+    };
+    window.addEventListener('auth-error', handleAuthError);
+    return () => window.removeEventListener('auth-error', handleAuthError);
+  }, [logout]);
+
+
+
+
+  const hasInitialized = React.useRef(false);
+
+  useEffect(() => {
+    if (hasInitialized.current) return;
+
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setAuthState({
+          token: storedToken,
+          user: JSON.parse(storedUser),
+          isLoading: false,
+        });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        logout();
+      }
+    } else {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
     }
-    setIsLoading(false);
-  }, []);
+    
+    hasInitialized.current = true;
+  }, [logout]);
 
-  const login = (newToken: string, newUser: User) => {
-    setToken(newToken);
-    setUser(newUser);
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
-  };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  };
+
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ ...authState, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
+
 
 export function useAuth() {
   const context = useContext(AuthContext);
