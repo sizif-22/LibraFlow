@@ -4,6 +4,8 @@ import { FineCalculator } from '../strategies/fines/FineCalculator';
 import { PerDayFine } from '../strategies/fines/PerDayFine';
 import { FixedFine } from '../strategies/fines/FixedFine';
 import { PercentageFine } from '../strategies/fines/PercentageFine';
+import { NotificationRepository } from '../repositories/NotificationRepository';
+import { NotificationType } from '@prisma/client';
 
 export class FineService {
     static async calculateFineOnReturn(borrowId: number, strategyType: 'PER_DAY' | 'FIXED' | 'PERCENTAGE' = 'PER_DAY') {
@@ -41,7 +43,13 @@ export class FineService {
         const amount = calculator.calculate(overdueDays, bookPrice);
 
         if (amount > 0) {
-            return await FineRepository.createFine(borrowId, borrow.studentId, amount);
+            const fine = await FineRepository.createFine(borrowId, borrow.studentId, amount);
+            await NotificationRepository.create(
+                borrow.studentId,
+                `A fine of ${amount} EGP has been added for returning "${borrow.book.title}" late.`,
+                NotificationType.FINE_ADDED
+            );
+            return fine;
         }
 
         return null;

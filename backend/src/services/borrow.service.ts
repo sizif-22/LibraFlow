@@ -2,7 +2,9 @@ import prisma from '../db/client'
 import { BorrowType, BorrowStatus } from '../types/borrow'
 import { BorrowRepository } from '../repositories/BorrowRepository'
 import { FineRepository } from '../repositories/FineRepository'
+import { NotificationRepository } from '../repositories/NotificationRepository'
 import { BorrowFactory } from '../factories/borrow/BorrowFactory'
+import { NotificationType } from '@prisma/client'
 
 /**
  * BorrowService — Business logic for the borrow lifecycle.
@@ -98,6 +100,13 @@ export const BorrowService = {
             }),
         ])
 
+        // Trigger notification
+        await NotificationRepository.create(
+            updatedBorrow.studentId,
+            `Your request to borrow "${updatedBorrow.book.title}" has been approved. Due date is ${dueDate.toDateString()}.`,
+            NotificationType.BORROW_APPROVED
+        )
+
         return updatedBorrow
     },
 
@@ -113,7 +122,18 @@ export const BorrowService = {
             throw new Error(`Cannot reject a borrow that is already ${borrow.status}`)
         }
 
-        return BorrowRepository.updateStatus(borrowId, BorrowStatus.REJECTED)
+        const updatedBorrow = await BorrowRepository.updateStatus(borrowId, BorrowStatus.REJECTED)
+
+        // Trigger notification
+        if (updatedBorrow && updatedBorrow.book) {
+            await NotificationRepository.create(
+                updatedBorrow.studentId,
+                `Your request to borrow "${updatedBorrow.book.title}" has been rejected.`,
+                NotificationType.BORROW_REJECTED
+            )
+        }
+
+        return updatedBorrow
     },
 
     /**

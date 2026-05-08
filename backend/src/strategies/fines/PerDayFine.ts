@@ -1,4 +1,4 @@
-import { IFineStrategy } from './IFineStrategy';
+import type { IFineStrategy } from './IFineStrategy';
 
 export class PerDayFine implements IFineStrategy {
   calculate(overdueDays: number): number {

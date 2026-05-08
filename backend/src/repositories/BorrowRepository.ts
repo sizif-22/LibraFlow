@@ -119,4 +119,25 @@ export const BorrowRepository = {
             },
         })
     },
+
+    /** Find all approved borrows due exactly tomorrow */
+    async findDueTomorrow() {
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(0, 0, 0, 0)
+        
+        const nextDay = new Date(tomorrow)
+        nextDay.setDate(nextDay.getDate() + 1)
+
+        return prisma.borrow.findMany({
+            where: {
+                status: BorrowStatus.APPROVED,
+                dueDate: {
+                    gte: tomorrow,
+                    lt: nextDay,
+                },
+            },
+            include: borrowWithRelations,
+        })
+    },
 }
