@@ -5,6 +5,8 @@ import { authController } from './controllers/auth.controller'
 import { bookController } from './controllers/book.controller'
 import { borrowController } from './controllers/borrow.controller'
 import { fineController } from './controllers/fine.controller'
+import { notificationController } from './controllers/notification.controller'
+import { adminController } from './controllers/admin.controller'
 
 const app = new Elysia()
     .use(cors())
@@ -30,6 +32,8 @@ const app = new Elysia()
             .use(bookController)
             .use(borrowController)
             .use(fineController)
+            .use(notificationController)
+            .use(adminController)
     )
     .onError(({ code, error, set }) => {
         if (code === 'NOT_FOUND') {
