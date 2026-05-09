@@ -10,8 +10,8 @@ import { adminApi } from '@/lib/api/admin';
 import { User, TopBookReport, OverdueBorrowReport, FineReport, SystemHealth } from '@/lib/types/admin';
 import { 
   Users, Clock, DollarSign, 
-  Settings, Shield, UserCheck, UserX,
-  TrendingUp, AlertTriangle, Loader2, ArrowRight, Plus, X, Eye, EyeOff
+  Settings, UserCheck, UserX,
+  TrendingUp, AlertTriangle, Loader2, Plus, X, Eye, EyeOff
 } from 'lucide-react';
 import SuccessToast from '@/components/SuccessToast';
 
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center gap-4">
         <Loader2 size={48} className="animate-spin text-white" />
-        <p className="text-[#888888] font-[500] text-[13px] uppercase tracking-wide">Loading System Data...</p>
+        <p className="text-[#888888] font-medium text-[13px] uppercase tracking-wide">Loading System Data...</p>
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
         <div className="min-h-screen bg-[#000000] px-6 py-12">
           <div className="max-w-7xl mx-auto">
             <header className="mb-10">
-            <h1 className="text-[36px] font-[800] leading-tight flex items-baseline">
+            <h1 className="text-[36px] font-extrabold leading-tight flex items-baseline">
               <span className="text-white">Admin</span>
               <span className="text-[#888888] ml-2">Command</span>
             </h1>
@@ -135,35 +135,35 @@ export default function AdminDashboard() {
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <Users size={18} className="text-[#555555]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">TOTAL USERS</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">TOTAL USERS</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">{users.length}</div>
+              <div className="text-[40px] font-extrabold text-white mt-3 leading-none">{users.length}</div>
             </div>
             
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <Clock size={18} className="text-[#555555]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">OVERDUE</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">OVERDUE</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">{overdueBorrows.length}</div>
+              <div className="text-[40px] font-extrabold text-white mt-3 leading-none">{overdueBorrows.length}</div>
             </div>
 
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <DollarSign size={18} className="text-[#555555]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">TOTAL FINES</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">TOTAL FINES</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">
-                {fineReport?.totalCollected ?? 0} <span className="text-[14px] font-[500] text-[#555555]">EGP</span>
+              <div className="text-[40px] font-extrabold text-white mt-3 leading-none">
+                {fineReport?.totalCollected ?? 0} <span className="text-[14px] font-medium text-[#555555]">EGP</span>
               </div>
             </div>
 
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <TrendingUp size={18} className="text-[#555555]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">GROWTH</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">GROWTH</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">{growth}</div>
+              <div className="text-[40px] font-extrabold text-white mt-3 leading-none">{growth}</div>
             </div>
           </div>
 
@@ -175,13 +175,13 @@ export default function AdminDashboard() {
               {/* User Directory */}
               <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] overflow-hidden">
                 <div className="p-[24px] border-b border-[#222222] flex justify-between items-center bg-[#111111]">
-                  <h3 className="text-[16px] font-[700] text-white flex items-center gap-3">
+                  <h3 className="text-[16px] font-bold text-white flex items-center gap-3">
                     <Settings className="text-[#555555]" size={18} />
                     User Directory
                   </h3>
                   <button 
                     onClick={() => setShowCreateModal(true)}
-                    className="bg-white text-black text-[12px] font-[600] uppercase tracking-wider px-[16px] py-[8px] rounded-[6px] hover:bg-[#eeeeee] transition-all flex items-center gap-2"
+                    className="bg-white text-black text-[12px] font-semibold uppercase tracking-wider px-[16px] py-[8px] rounded-[6px] hover:bg-[#eeeeee] transition-all flex items-center gap-2"
                   >
                     <Plus size={14} /> New User
                   </button>
@@ -190,39 +190,39 @@ export default function AdminDashboard() {
                   <table className="w-full text-left">
                     <thead>
                       <tr className="bg-[#111111] border-b border-[#222222]">
-                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-[600] uppercase tracking-widest">User</th>
-                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-[600] uppercase tracking-widest">Role</th>
-                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-[600] uppercase tracking-widest">Status</th>
-                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-[600] uppercase tracking-widest text-right">Actions</th>
+                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-semibold uppercase tracking-widest">User</th>
+                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-semibold uppercase tracking-widest">Role</th>
+                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-semibold uppercase tracking-widest">Status</th>
+                        <th className="px-[24px] py-[16px] text-[#555555] text-[10px] font-semibold uppercase tracking-widest text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#222222]">
-                      {users.map((user) => (
+                      {users.filter(u => u.role !== 'ADMIN').map((user) => (
                         <tr key={user.id} className="hover:bg-[#1f1f1f] transition-colors">
                           <td className="px-[24px] py-[20px]">
                             <div className="flex items-center gap-4">
-                              <div className="w-[40px] h-[40px] rounded-[8px] bg-[#2a2a2a] flex items-center justify-center border border-[#333333] text-[#888888] font-[600] text-[14px]">
+                              <div className="w-[40px] h-[40px] rounded-[8px] bg-[#2a2a2a] flex items-center justify-center border border-[#333333] text-[#888888] font-semibold text-[14px]">
                                 {user.name.charAt(0)}
                               </div>
                               <div>
-                                <div className="text-white font-[600] text-[14px]">{user.name}</div>
+                                <div className="text-white font-semibold text-[14px]">{user.name}</div>
                                 <div className="text-[#666666] text-[12px] mt-1">{user.email}</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-[24px] py-[20px]">
-                            <span className="text-[12px] font-[600] text-[#cccccc] uppercase tracking-wider">
+                            <span className="text-[12px] font-semibold text-[#cccccc] uppercase tracking-wider">
                               {user.role}
                             </span>
                           </td>
                           <td className="px-[24px] py-[20px]">
                             {user.isActive ? (
-                              <span className="flex items-center gap-2 text-[#4ade80] text-[10px] font-[600] uppercase tracking-wide">
+                              <span className="flex items-center gap-2 text-[#4ade80] text-[10px] font-semibold uppercase tracking-wide">
                                 <div className="w-[6px] h-[6px] rounded-full bg-[#4ade80]" />
                                 Active
                               </span>
                             ) : (
-                              <span className="flex items-center gap-2 text-[#f87171] text-[10px] font-[600] uppercase tracking-wide">
+                              <span className="flex items-center gap-2 text-[#f87171] text-[10px] font-semibold uppercase tracking-wide">
                                 <div className="w-[6px] h-[6px] rounded-full bg-[#f87171]" />
                                 Inactive
                               </span>
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
               {/* Overdue Borrows */}
               <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] overflow-hidden">
                 <div className="p-[24px] border-b border-[#222222] bg-[#111111]">
-                  <h3 className="text-[16px] font-[700] text-white flex items-center gap-3">
+                  <h3 className="text-[16px] font-bold text-white flex items-center gap-3">
                     <AlertTriangle className="text-[#f87171]" size={18} />
                     Overdue Watchlist
                   </h3>
@@ -267,13 +267,13 @@ export default function AdminDashboard() {
                               <Clock size={20} />
                             </div>
                             <div>
-                              <h4 className="text-white font-[600] text-[14px] group-hover:text-[#f87171] transition-colors">{report.bookTitle}</h4>
-                              <p className="text-[#666666] text-[12px] mt-1">Borrowed by <span className="text-[#aaaaaa] font-[500]">{report.studentName}</span></p>
+                              <h4 className="text-white font-semibold text-[14px] group-hover:text-[#f87171] transition-colors">{report.bookTitle}</h4>
+                              <p className="text-[#666666] text-[12px] mt-1">Borrowed by <span className="text-[#aaaaaa] font-medium">{report.studentName}</span></p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[#f87171] font-[800] text-[18px]">{report.overdueDays}d</div>
-                            <div className="text-[10px] text-[#555555] font-[600] uppercase tracking-wider mt-1">Late</div>
+                            <div className="text-[#f87171] font-extrabold text-[18px]">{report.overdueDays}d</div>
+                            <div className="text-[10px] text-[#555555] font-semibold uppercase tracking-wider mt-1">Late</div>
                           </div>
                         </div>
                       ))}
@@ -288,7 +288,7 @@ export default function AdminDashboard() {
               
               {/* Popular Books */}
               <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[28px]">
-                <h3 className="text-[16px] font-[700] text-white mb-8 flex items-center gap-3">
+                <h3 className="text-[16px] font-bold text-white mb-8 flex items-center gap-3">
                   <TrendingUp className="text-[#555555]" size={18} />
                   Popular Books
                 </h3>
@@ -297,10 +297,10 @@ export default function AdminDashboard() {
                     <div key={book.id} className="space-y-2">
                       <div className="flex justify-between items-end">
                         <div className="flex-1 min-w-0 pr-4">
-                          <div className="text-[10px] font-[600] text-[#555555] uppercase tracking-widest mb-1">Rank #{idx + 1}</div>
-                          <div className="text-[13px] font-[600] text-white truncate">{book.title}</div>
+                          <div className="text-[10px] font-semibold text-[#555555] uppercase tracking-widest mb-1">Rank #{idx + 1}</div>
+                          <div className="text-[13px] font-semibold text-white truncate">{book.title}</div>
                         </div>
-                        <div className="text-white font-[800] text-[14px]">{book.borrowCount}</div>
+                        <div className="text-white font-extrabold text-[14px]">{book.borrowCount}</div>
                       </div>
                       <div className="h-[4px] bg-[#222222] rounded-full overflow-hidden">
                         <div 
@@ -315,18 +315,18 @@ export default function AdminDashboard() {
 
               {/* System Health */}
               <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[28px]">
-                <h3 className="text-[16px] font-[700] text-white mb-6">System Status</h3>
+                <h3 className="text-[16px] font-bold text-white mb-6">System Status</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-[12px] bg-[#111111] rounded-[6px] border border-[#222222]">
-                    <span className="text-[12px] text-[#888888] font-[500]">Database Connection</span>
+                    <span className="text-[12px] text-[#888888] font-medium">Database Connection</span>
                     <span className={`w-[6px] h-[6px] rounded-full ${systemHealth?.database === 'connected' ? 'bg-[#4ade80]' : 'bg-[#f87171]'}`} />
                   </div>
                   <div className="flex items-center justify-between p-[12px] bg-[#111111] rounded-[6px] border border-[#222222]">
-                    <span className="text-[12px] text-[#888888] font-[500]">API Gateway</span>
+                    <span className="text-[12px] text-[#888888] font-medium">API Gateway</span>
                     <span className={`w-[6px] h-[6px] rounded-full ${systemHealth?.apiGateway === 'online' ? 'bg-[#4ade80]' : 'bg-[#f87171]'}`} />
                   </div>
                   <div className="flex items-center justify-between p-[12px] bg-[#111111] rounded-[6px] border border-[#222222]">
-                    <span className="text-[12px] text-[#888888] font-[500]">Notification Service</span>
+                    <span className="text-[12px] text-[#888888] font-medium">Notification Service</span>
                     <span className={`w-[6px] h-[6px] rounded-full ${systemHealth?.notificationService === 'active' ? 'bg-[#4ade80]' : 'bg-[#f87171]'}`} />
                   </div>
                 </div>
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
               <div className="w-full max-w-[480px] bg-[#1a1a1a] border border-[#333333] rounded-[12px] shadow-2xl overflow-hidden">
                 <div className="p-[24px] border-b border-[#333333] flex justify-between items-center bg-[#111111]">
-                  <h2 className="text-[18px] font-[700] text-white">Create User Account</h2>
+                  <h2 className="text-[18px] font-bold text-white">Create User Account</h2>
                   <button onClick={() => setShowCreateModal(false)} className="text-[#888888] hover:text-white transition-colors">
                     <X size={20} />
                   </button>
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
 
                   <form onSubmit={handleCreateUser} className="space-y-5">
                     <div className="space-y-2">
-                      <label className="text-[11px] text-[#888888] uppercase tracking-wide font-[600]">Full Name</label>
+                      <label className="text-[11px] text-[#888888] uppercase tracking-wide font-semibold">Full Name</label>
                       <input
                         type="text"
                         required
@@ -367,7 +367,7 @@ export default function AdminDashboard() {
                     </div>
                     
                     <div className="space-y-2">
-                      <label className="text-[11px] text-[#888888] uppercase tracking-wide font-[600]">Email</label>
+                      <label className="text-[11px] text-[#888888] uppercase tracking-wide font-semibold">Email</label>
                       <input
                         type="email"
                         required
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[11px] text-[#888888] uppercase tracking-wide font-[600]">Password</label>
+                      <label className="text-[11px] text-[#888888] uppercase tracking-wide font-semibold">Password</label>
                       <div className="relative">
                         <input
                           type={showPassword ? "text" : "password"}
@@ -417,14 +417,14 @@ export default function AdminDashboard() {
                       <button
                         type="button"
                         onClick={() => setShowCreateModal(false)}
-                        className="px-[20px] py-[10px] text-[13px] font-[600] text-[#888888] hover:text-white transition-all"
+                        className="px-[20px] py-[10px] text-[13px] font-semibold text-[#888888] hover:text-white transition-all"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={isCreating}
-                        className="bg-white text-black text-[13px] font-[600] px-[24px] py-[10px] rounded-[6px] hover:bg-[#eeeeee] transition-all flex items-center gap-2"
+                        className="bg-white text-black text-[13px] font-semibold px-[24px] py-[10px] rounded-[6px] hover:bg-[#eeeeee] transition-all flex items-center gap-2"
                       >
                         {isCreating ? <Loader2 size={16} className="animate-spin" /> : 'Create Account'}
                       </button>

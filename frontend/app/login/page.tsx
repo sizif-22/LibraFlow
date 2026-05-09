@@ -48,7 +48,15 @@ function LoginContent() {
       const response = await api.post<{ token: string; user: User }>('/auth/login', data);
       const { token, user } = response.data;
       login(token, user);
-      router.push('/books');
+      
+      if (!user.isVerified) {
+        router.push('/activate');
+      } else {
+        // Redirect based on role
+        if (user.role === 'ADMIN') router.push('/admin/dashboard');
+        else if (user.role === 'LIBRARIAN') router.push('/librarian/dashboard');
+        else router.push('/books');
+      }
     } catch (err: unknown) {
       const apiError = err as ApiError;
       setError((apiError.response?.data as { message?: string })?.message || 'Login failed. Please check your credentials.');
@@ -70,12 +78,12 @@ function LoginContent() {
         <div className="w-full max-w-[420px] bg-[#1a1a1a] rounded-[16px] border border-[#2a2a2a] p-[48px] shadow-2xl">
           <div className="flex flex-col items-center">
             <BarChart3 className="text-[#555555] mb-2" size={24} />
-            <h1 className="text-[28px] font-[700] text-white leading-tight">LibraFlow</h1>
+            <h1 className="text-[28px] font-bold text-white leading-tight">LibraFlow</h1>
             <p className="text-[13px] text-[#888888]">Academic Archive System</p>
             
             <div className="h-[32px]" />
             
-            <h2 className="text-[20px] font-[600] text-white">Welcome Back</h2>
+            <h2 className="text-[20px] font-semibold text-white">Welcome Back</h2>
             <p className="text-[14px] text-[#888888]">Access your scholarly repository</p>
             
             <div className="h-[24px]" />
@@ -108,7 +116,7 @@ function LoginContent() {
             <div className="space-y-[8px]">
               <div className="flex justify-between items-center px-[2px]">
                 <label className="text-[12px] text-[#aaaaaa] uppercase tracking-wide">Password</label>
-                <Link href="#" className="text-[12px] text-[#888888] hover:text-white transition-colors">Forgot?</Link>
+                <Link href="/forgot-password" className="text-[12px] text-[#888888] hover:text-white transition-colors">Forgot?</Link>
               </div>
               <div className="relative">
                 <input
@@ -133,7 +141,7 @@ function LoginContent() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-[52px] bg-white text-black text-[16px] font-[500] rounded-[8px] hover:bg-[#eeeeee] transition-all flex items-center justify-center gap-2"
+              className="w-full h-[52px] bg-white text-black text-[16px] font-medium rounded-[8px] hover:bg-[#eeeeee] transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <Loader2 className="animate-spin text-black" size={20} />
@@ -147,7 +155,7 @@ function LoginContent() {
 
           <p className="text-center text-[14px]">
             <span className="text-[#888888]">Don&apos;t have an account? </span>
-            <Link href="/register" className="text-white font-[600] hover:underline">
+            <Link href="/register" className="text-white font-semibold hover:underline">
               Sign up
             </Link>
           </p>

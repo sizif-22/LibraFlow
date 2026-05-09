@@ -8,9 +8,10 @@ const SENDER_NAME = process.env.SENDER_NAME || "";
 
 export const EmailService = {
     async sendEmail(to: string, subject: string, templateName: string, data: Record<string, string>) {
+        console.log(`[EmailService] Attempting to send "${templateName}" email to: ${to}`);
         try {
             // Load template
-            const templatePath = path.join(process.cwd(), 'src', 'templates', 'emails', `${templateName}.html`);
+            const templatePath = path.join(process.cwd(), 'src', 'templates', `${templateName}.html`);
             let htmlContent = await fs.readFile(templatePath, 'utf-8');
 
             // Replace placeholders {{key}} with data[key]
@@ -52,6 +53,7 @@ export const EmailService = {
                 throw new Error('Failed to send email');
             }
 
+            console.log(`[EmailService] Email sent successfully to: ${to} (Subject: ${subject})`);
             return await response.json();
         } catch (error) {
             console.error('Email Service Error:', error);
@@ -61,6 +63,7 @@ export const EmailService = {
     },
 
     async sendWelcomeEmail(to: string, name: string) {
+        console.log(`[EmailService] Triggering Welcome Email for: ${name}`);
         return this.sendEmail(to, 'Welcome to LibraFlow', 'welcome', {
             name,
             email: to,
@@ -93,10 +96,25 @@ export const EmailService = {
     },
 
     async sendFineNotification(to: string, name: string, bookTitle: string, amount: string) {
+        console.log(`[EmailService] Triggering Fine Notification for: ${name} (Amount: ${amount})`);
         return this.sendEmail(to, `Fine Issued: ${amount} EGP`, 'fine-added', {
             name,
             bookTitle,
             amount
+        });
+    },
+
+    async sendVerificationCode(to: string, code: string) {
+        console.log(`[EmailService] Triggering Verification Code for: ${to}`);
+        return this.sendEmail(to, 'Your Verification Code', 'verification-code', {
+            code
+        });
+    },
+
+    async sendPasswordResetCode(to: string, code: string) {
+        console.log(`[EmailService] Triggering Password Reset Code for: ${to}`);
+        return this.sendEmail(to, 'Reset Your Password', 'reset-password', {
+            code
         });
     }
 };

@@ -26,7 +26,9 @@ export const AdminService = {
                 email,
                 name,
                 password: hashedPassword,
-                role
+                role,
+                isActive: true,
+                isVerified: false
             },
             select: {
                 id: true,
