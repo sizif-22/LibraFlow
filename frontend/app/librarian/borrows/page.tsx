@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -117,7 +118,7 @@ export default function LibrarianBorrowsPage() {
   const fetchStats = async () => {
     try {
       const response = await api.get('/admin/stats');
-      setStats(response.data);
+      setStats(response.data as any);
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }

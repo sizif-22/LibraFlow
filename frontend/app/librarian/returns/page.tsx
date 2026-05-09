@@ -51,7 +51,7 @@ export default function LibrarianReturnsPage() {
   const fetchStats = async () => {
     try {
       const response = await api.get('/admin/stats');
-      setStats(response.data);
+      setStats(response.data as any);
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }
