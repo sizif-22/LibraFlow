@@ -1,15 +1,23 @@
 'use client';
 import Link from 'next/link';
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Library, LogOut, Search } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -45,13 +53,13 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-[#0d0d0d] border-b border-[#1f1f1f] px-10 h-20 flex items-center justify-between">
       <div className="flex items-center gap-12">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-[18px] font-[800] tracking-tight text-white">
+          <span className="text-[18px] font-extrabold tracking-tight text-white">
             LibraFlow
           </span>
         </Link>
 
         <div className="flex items-center gap-8">
-          {navLinks.map((link) => {
+          {isMounted && navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
@@ -72,14 +80,16 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-6">
-        {user ? (
+        {!isMounted ? (
+          <div className="w-20 h-8 bg-[#1a1a1a] animate-pulse rounded-[6px]" />
+        ) : user ? (
           <div className="flex items-center gap-6">
             {/* <Search size={20} className="text-white cursor-pointer hover:text-gray-300 transition-colors" /> */}
             
             <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-9 h-9 rounded-full bg-[#1a1a1a] border border-[#333333] flex items-center justify-center text-white text-[14px] font-[600] hover:bg-[#222222] transition-all uppercase"
+                className="w-9 h-9 rounded-full bg-[#1a1a1a] border border-[#333333] flex items-center justify-center text-white text-[14px] font-semibold hover:bg-[#222222] transition-all uppercase"
               >
                 {user?.name ? user.name.charAt(0) : 'U'}
               </button>
@@ -87,7 +97,7 @@ export default function Navbar() {
               {isDropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-2xl overflow-hidden py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-3 border-b border-[#222222]">
-                    <p className="text-[14px] font-[600] text-white truncate">{user?.name || 'User'}</p>
+                    <p className="text-[14px] font-semibold text-white truncate">{user?.name || 'User'}</p>
                     <p className="text-[12px] text-[#888888] truncate mt-0.5">{user?.email || 'user@example.com'}</p>
                   </div>
                   <div className="py-1">

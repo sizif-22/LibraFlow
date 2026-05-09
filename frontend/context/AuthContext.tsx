@@ -42,7 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const parsedUser = JSON.parse(storedUser);
         return {
           token: storedToken,
-          user: { isActive: true, isVerified: true, ...parsedUser },
+          user: { 
+            isActive: true, 
+            isVerified: true, 
+            ...parsedUser 
+          },
           isLoading: false,
         };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
