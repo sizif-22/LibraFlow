@@ -31,29 +31,33 @@ const app = new Elysia()
             user: profile ? (profile as AuthUser) : null
         }
     })
-    .macro(({ onBeforeHandle }) => ({
+    .macro({
         isAuth(value: boolean) {
-            onBeforeHandle(({ user, set }) => {
-                if (value && !user) {
-                    set.status = 401;
-                    return { message: 'Unauthorized: You must be logged in to access this resource' }
+            return {
+                beforeHandle({ user, set }: any) {
+                    if (value && !user) {
+                        set.status = 401;
+                        return { message: 'Unauthorized: You must be logged in to access this resource' }
+                    }
                 }
-            })
+            }
         },
         hasRole(roles: string[]) {
-            onBeforeHandle(({ user, set }: any) => {
-                if (!user) {
-                    set.status = 401
-                    return { message: 'Unauthorized' }
+            return {
+                beforeHandle({ user, set }: any) {
+                    if (!user) {
+                        set.status = 401
+                        return { message: 'Unauthorized' }
+                    }
+                    
+                    if (!roles.includes(user.role)) {
+                        set.status = 403
+                        return { message: 'Forbidden: Insufficient permissions' }
+                    }
                 }
-                
-                if (!roles.includes(user.role)) {
-                    set.status = 403
-                    return { message: 'Forbidden: Insufficient permissions' }
-                }
-            })
+            }
         }
-    }))
+    })
 
     .use(swagger({
         documentation: {
