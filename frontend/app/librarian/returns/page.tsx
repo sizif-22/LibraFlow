@@ -9,10 +9,17 @@ import AdminLayout from '@/components/AdminLayout';
 import { returnBorrow } from '@/lib/api/borrows';
 import { Borrow } from '@/lib/types/borrow';
 import { Archive, Loader2 } from 'lucide-react';
+import api from '@/lib/api';
 
 export default function LibrarianReturnsPage() {
   const [borrows, setBorrows] = useState<Borrow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    pendingToday: 0,
+    overdueBooks: 0,
+    avgProcessing: '2.4m',
+    totalShelved: 0
+  });
 
   const fetchActiveBorrows = useCallback(async () => {
     setIsLoading(true);
@@ -41,11 +48,21 @@ export default function LibrarianReturnsPage() {
     }
   }, []);
 
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/admin/stats');
+      setStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
+
   const { token } = useAuth();
 
   useEffect(() => {
     if (token) {
       fetchActiveBorrows();
+      fetchStats();
     }
   }, [fetchActiveBorrows, token]);
 
@@ -56,10 +73,10 @@ export default function LibrarianReturnsPage() {
           {/* KPI Cards Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'PENDING TODAY', value: '0' },
-              { label: 'OVERDUE BOOKS', value: '12' },
-              { label: 'AVG PROCESSING', value: '2.4m' },
-              { label: 'TOTAL SHELVED', value: '842' },
+              { label: 'PENDING TODAY', value: stats.pendingToday },
+              { label: 'OVERDUE BOOKS', value: stats.overdueBooks },
+              { label: 'AVG PROCESSING', value: stats.avgProcessing },
+              { label: 'TOTAL SHELVED', value: stats.totalShelved.toLocaleString() },
             ].map((stat) => (
               <div key={stat.label} className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px] px-[28px]">
                 <div className="text-[10px] text-[#666666] uppercase tracking-widest font-[500]">{stat.label}</div>

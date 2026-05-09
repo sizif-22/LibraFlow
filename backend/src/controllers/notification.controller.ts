@@ -66,3 +66,21 @@ export const notificationController = new Elysia({ prefix: '/notifications' })
             },
         }
     )
+    .put(
+        '/all-read',
+        async ({ user, set }: any) => {
+            try {
+                return await NotificationService.markAllAsRead(user.id)
+            } catch (e: any) {
+                set.status = 400
+                return { message: e.message || 'Failed to mark all notifications as read' }
+            }
+        },
+        {
+            isAuth: true,
+            detail: {
+                tags: ['Notifications'],
+                summary: 'Mark all notifications as read',
+            },
+        }
+    )

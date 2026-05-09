@@ -1,5 +1,5 @@
-const BASE_URL = 'http://localhost:3001/api';
-
+""
+const BASE_URL = process.env.NODE_ENV == "development" ? "http://localhost:3001/api" : process.env.BASE_URL;
 export interface ApiResponse<T = unknown> {
   data: T;
   status: number;

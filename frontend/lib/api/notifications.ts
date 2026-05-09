@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from '../api';
 import { Notification } from '../types/notification';
 
@@ -10,5 +11,9 @@ export const notificationsApi = {
   markAsRead: async (id: number): Promise<Notification> => {
     const response = await api.put(`/notifications/${id}/read`);
     return (response.data as any).notification || response.data;
+  },
+  
+  markAllAsRead: async (): Promise<void> => {
+    await api.put('/notifications/all-read');
   },
 };

@@ -15,20 +15,35 @@ import {
 } from 'lucide-react';
 import FinePaymentModal from '@/components/FinePaymentModal';
 import SuccessToast from '@/components/SuccessToast';
+import api from '@/lib/api';
 
 export default function LibrarianFinesPage() {
   const [fines, setFines] = useState<Fine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFine, setSelectedFine] = useState<Fine | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [stats, setStats] = useState({
+    unpaidFinesAccounts: 0,
+    totalFinesCollected: 0
+  });
 
   const { token } = useAuth();
 
   useEffect(() => {
     if (token) {
       fetchFines();
+      fetchStats();
     }
   }, [token]);
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/admin/stats');
+      setStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
 
   const fetchFines = async () => {
     setIsLoading(true);
@@ -59,7 +74,7 @@ export default function LibrarianFinesPage() {
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[32px]">
               <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-5 font-[600]">UNPAID FINES</div>
               <div className="flex items-baseline">
-                <span className="text-[52px] font-[800] text-white leading-none">124</span>
+                <span className="text-[52px] font-[800] text-white leading-none">{stats.unpaidFinesAccounts}</span>
                 <span className="text-[11px] text-[#555555] uppercase font-[600] ml-3">ACCOUNTS</span>
               </div>
             </div>
@@ -67,7 +82,7 @@ export default function LibrarianFinesPage() {
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[32px]">
               <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-5 font-[600]">TOTAL COLLECTED</div>
               <div className="flex items-baseline">
-                <span className="text-[52px] font-[800] text-white leading-none">$4,892</span>
+                <span className="text-[52px] font-[800] text-white leading-none">${stats.totalFinesCollected.toLocaleString()}</span>
                 <span className="text-[11px] text-[#555555] uppercase font-[600] ml-3">FISCAL YEAR</span>
               </div>
             </div>

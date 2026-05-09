@@ -11,6 +11,10 @@ export const NotificationService = {
     async markAsRead(notificationId: number) {
         return NotificationRepository.markAsRead(notificationId)
     },
+    
+    async markAllAsRead(studentId: number) {
+        return NotificationRepository.markAllAsRead(studentId)
+    },
 
     async triggerDueReminders() {
         // Find all borrows due exactly tomorrow

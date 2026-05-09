@@ -1,16 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { LogOut } from 'lucide-react';
+import { LogOut, Bell, CheckCheck, Clock, Check } from 'lucide-react';
+import { notificationsApi } from '@/lib/api/notifications';
+import { Notification } from '@/lib/types/notification';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -19,10 +26,63 @@ export default function Navbar() {
     return () => cancelAnimationFrame(frame);
   }, []);
 
+  // Fetch notifications if user is student
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const loadNotifications = async () => {
+      if (user?.role === 'STUDENT') {
+        try {
+          const data = await notificationsApi.getMyNotifications();
+          if (isSubscribed) {
+            setNotifications(data);
+          }
+        } catch (err) {
+          if (isSubscribed) {
+            console.error('Failed to fetch notifications:', err);
+          }
+        }
+      }
+    };
+
+    loadNotifications();
+
+    let interval: any;
+    if (user?.role === 'STUDENT') {
+      interval = setInterval(loadNotifications, 30000);
+    }
+
+    return () => {
+      isSubscribed = false;
+      if (interval) clearInterval(interval);
+    };
+  }, [user]);
+
+  const handleMarkAsRead = async (id: number) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    } catch (err) {
+      console.error('Failed to mark as read:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
+  };
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -37,6 +97,8 @@ export default function Navbar() {
   const isStudent = user?.role === 'STUDENT';
   const isLibrarian = user?.role === 'LIBRARIAN';
   const isAdmin = user?.role === 'ADMIN';
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const navLinks = [
     ...(isStudent ? [
@@ -83,9 +145,100 @@ export default function Navbar() {
         {!isMounted ? (
           <div className="w-20 h-8 bg-[#1a1a1a] animate-pulse rounded-[6px]" />
         ) : user ? (
-          <div className="flex items-center gap-6">
-            {/* <Search size={20} className="text-white cursor-pointer hover:text-gray-300 transition-colors" /> */}
+          <div className="flex items-center gap-4">
             
+            {/* Notification Bell */}
+            {isStudent && (
+              <div className="relative" ref={notificationsRef}>
+                <button 
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all relative ${
+                    isNotificationsOpen ? 'bg-white text-black' : 'bg-[#1a1a1a] text-[#888888] hover:text-white border border-[#333333]'
+                  }`}
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 w-4 h-4 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[#0d0d0d]">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {isNotificationsOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-[380px] bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-5 py-4 border-b border-[#1f1f1f] flex items-center justify-between bg-[#111111]/50 backdrop-blur-xl">
+                      <h3 className="text-[14px] font-bold text-white uppercase tracking-wider">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <span className="text-[10px] bg-white text-black px-2 py-0.5 rounded-full font-bold">
+                          {unreadCount} NEW
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                      {notifications.length > 0 ? (
+                        notifications.map((n) => (
+                          <div 
+                            key={n.id} 
+                            className={`px-5 py-4 border-b border-[#1f1f1f] hover:bg-[#1a1a1a] transition-all relative group ${!n.isRead ? 'bg-[#151515]' : ''}`}
+                          >
+                            <div className="flex gap-4">
+                              <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center ${!n.isRead ? 'bg-white text-black' : 'bg-[#1f1f1f] text-[#555555]'}`}>
+                                <Bell size={14} />
+                              </div>
+                              <div className="flex-1">
+                                <p className={`text-[13px] leading-relaxed ${!n.isRead ? 'text-white font-medium' : 'text-[#888888]'}`}>
+                                  {n.message}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Clock size={12} className="text-[#555555]" />
+                                  <span className="text-[10px] text-[#555555] font-medium">
+                                    {new Date(n.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                              {!n.isRead && (
+                                <button 
+                                  onClick={() => handleMarkAsRead(n.id)}
+                                  className="w-6 h-6 rounded-full bg-[#222222] flex items-center justify-center text-[#888888] hover:bg-white hover:text-black transition-all opacity-0 group-hover:opacity-100"
+                                  title="Mark as read"
+                                >
+                                  <Check size={12} />
+                                </button>
+                              )}
+                            </div>
+                            {!n.isRead && (
+                              <div className="absolute left-0 top-0 w-1 h-full bg-white" />
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-12 flex flex-col items-center justify-center text-center px-10">
+                          <div className="w-12 h-12 rounded-full bg-[#111111] flex items-center justify-center mb-4 border border-[#1f1f1f]">
+                            <Bell size={20} className="text-[#333333]" />
+                          </div>
+                          <p className="text-[13px] text-[#555555] font-medium">No notifications yet</p>
+                          <p className="text-[11px] text-[#333333] mt-1">We&apos;ll alert you when something important happens.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {notifications.length > 0 && (
+                      <div className="p-3 bg-[#111111]/50 backdrop-blur-xl border-t border-[#1f1f1f]">
+                        <button 
+                          onClick={handleMarkAllAsRead}
+                          className="w-full py-2.5 text-[11px] font-bold text-[#888888] hover:text-white uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                        >
+                          <CheckCheck size={14} />
+                          Mark all as read
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}

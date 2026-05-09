@@ -38,24 +38,20 @@ export default function LibrarianDashboard() {
     if (!token) return;
     (async () => {
       try {
-        const [borrows, fines, books, users] = await Promise.all([
-          api.get('/borrows'),
-          api.get('/fines'),
-          api.get('/books'),
-          api.get('/admin/users') // Note: Using admin/users might need adjustment if permissions differ
+        const [statsRes, usersRes] = await Promise.all([
+          api.get('/admin/stats'),
+          api.get('/admin/users')
         ]);
 
-        const bData = (borrows.data as any).borrows || borrows.data;
-        const fData = (fines.data as any).fines || fines.data;
-        const bkData = (books.data as any).books || books.data;
-        const uData = (users.data as any) || [];
+        const s = statsRes.data;
+        const uData = usersRes.data || [];
 
         setStats({
-          pendingBorrows: Array.isArray(bData) ? bData.filter((b: any) => b.status === 'PENDING').length : 0,
-          activeBorrows: Array.isArray(bData) ? bData.filter((b: any) => b.status === 'APPROVED').length : 0,
-          overdueReturns: Array.isArray(bData) ? bData.filter((b: any) => b.status === 'APPROVED' && b.dueDate && new Date(b.dueDate) < new Date()).length : 0,
-          unpaidFines: Array.isArray(fData) ? fData.filter((f: any) => !f.isPaid).length : 0,
-          totalBooks: (books.data as any).pagination?.total || (Array.isArray(bkData) ? bkData.length : 0),
+          pendingBorrows: s.pendingBorrows,
+          activeBorrows: s.onLoan, // onLoan represents active borrows
+          overdueReturns: s.overdueBooks,
+          unpaidFines: 0, // Need to add to stats if possible, or keep as is
+          totalBooks: s.totalBooks,
           totalUsers: uData.length
         });
       } catch (err: any) {

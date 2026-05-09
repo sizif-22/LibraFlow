@@ -45,22 +45,42 @@ export default function LibrarianBooksPage() {
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [bookToDelete, setBookToDelete] = useState<number | null>(null);
+  const [totalBooks, setTotalBooks] = useState(0);
+  const [stats, setStats] = useState({
+    totalVolumes: 0,
+    onLoan: 0,
+    archiveStatus: '100%',
+    systemHealth: 'Operational'
+  });
 
   const { token } = useAuth();
 
   useEffect(() => {
     if (token) {
       fetchBooks();
+      fetchStats();
     }
   }, [token]);
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/admin/stats');
+      setStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
 
   const fetchBooks = async () => {
     setIsLoading(true);
     try {
       const response = await api.get('/books');
-      const data = response.data as { books?: Book[] } | Book[];
+      const data = response.data as { books?: Book[], pagination?: { total: number } } | Book[];
       const bookData = Array.isArray(data) ? data : data.books || [];
+      const totalCount = Array.isArray(data) ? bookData.length : data.pagination?.total || bookData.length;
+      
       setBooks(bookData as Book[]);
+      setTotalBooks(totalCount);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.response?.status !== 401) {
@@ -128,13 +148,12 @@ export default function LibrarianBooksPage() {
             </button>
           </header>
 
-          {/* Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
             {[
-              { label: 'Total Volumes', value: '12,482' },
-              { label: 'On Loan', value: '843' },
-              { label: 'Archive Status', value: '98%' },
-              { label: 'System Health', value: 'Operational', italic: true },
+              { label: 'Total Volumes', value: stats.totalVolumes.toLocaleString() },
+              { label: 'On Loan', value: stats.onLoan.toLocaleString() },
+              { label: 'Archive Status', value: stats.archiveStatus },
+              { label: 'System Health', value: stats.systemHealth, italic: true },
             ].map((stat) => (
               <div key={stat.label} className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
                 <div className="text-[11px] text-[#888888] uppercase tracking-wider font-[500]">{stat.label}</div>
@@ -222,7 +241,7 @@ export default function LibrarianBooksPage() {
             {/* Pagination Row */}
             <div className="px-6 py-4 flex items-center justify-between">
               <div className="text-[12px] text-[#555555]">
-                Showing {filteredBooks.length} of 12,482 entries
+                Showing {filteredBooks.length} of {totalBooks.toLocaleString()} entries
               </div>
               <div className="flex items-center gap-4">
                 <button className="text-[12px] text-[#555555] hover:text-white transition-all">Previous</button>

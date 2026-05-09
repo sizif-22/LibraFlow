@@ -10,6 +10,7 @@ import {
   approveBorrow,
   rejectBorrow,
 } from '@/lib/api/borrows';
+import api from '@/lib/api';
 import { Borrow } from '@/lib/types/borrow';
 import { Loader2 } from 'lucide-react';
 
@@ -85,6 +86,9 @@ export default function LibrarianBorrowsPage() {
   const [borrows, setBorrows] = useState<Borrow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actingId, setActingId] = useState<number | null>(null);
+  const [stats, setStats] = useState({
+    avgResponse: '1.2D'
+  });
 
   const fetchPending = useCallback(async () => {
     setIsLoading(true);
@@ -106,8 +110,18 @@ export default function LibrarianBorrowsPage() {
   useEffect(() => {
     if (token) {
       fetchPending();
+      fetchStats();
     }
   }, [fetchPending, token]);
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/admin/stats');
+      setStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
 
   const handleApprove = async (id: number) => {
     setActingId(id);
@@ -147,11 +161,11 @@ export default function LibrarianBorrowsPage() {
             <div className="flex gap-12 text-right">
               <div>
                 <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-1 font-[600]">PENDING TOTAL</div>
-                <div className="text-[28px] font-[800] text-white">24</div>
+                <div className="text-[28px] font-[800] text-white">{borrows.length}</div>
               </div>
               <div>
                 <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-1 font-[600]">AVG RESPONSE</div>
-                <div className="text-[28px] font-[800] text-white">1.2D</div>
+                <div className="text-[28px] font-[800] text-white">{stats.avgResponse}</div>
               </div>
             </div>
           </header>

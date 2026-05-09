@@ -127,9 +127,19 @@ export const adminController = new Elysia({ prefix: '/admin' })
         return await AdminService.getSystemHealth()
     }, {
         isAuth: true,
-        hasRole: ['ADMIN'],
+        hasRole: ['ADMIN', 'LIBRARIAN'],
         detail: {
             tags: ['Admin'],
             summary: 'Get system health status',
+        },
+    })
+    .get('/stats', async () => {
+        return await AdminService.getDashboardStats()
+    }, {
+        isAuth: true,
+        hasRole: ['ADMIN', 'LIBRARIAN'],
+        detail: {
+            tags: ['Admin'],
+            summary: 'Get overall library statistics',
         },
     })
