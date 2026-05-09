@@ -3,18 +3,31 @@ import { BookService } from '../services/book.service'
 
 export const bookController = new Elysia({ prefix: '/books' })
     .get('/', async ({ query }: any) => {
-        const { search, page, limit } = query
+        const { search, category, page, limit } = query
         return await BookService.getAll({
             search,
+            category,
             page: page ? parseInt(page) : 1,
-            limit: limit ? parseInt(limit) : 10
+            limit: limit ? parseInt(limit) : 20
         })
     }, {
         isAuth: true,
         query: t.Object({
             search: t.Optional(t.String()),
+            category: t.Optional(t.String()),
             page: t.Optional(t.String()),
             limit: t.Optional(t.String())
+        })
+    })
+    .get('/grouped', async ({ query }: any) => {
+        const { search, category, author } = query
+        return await BookService.getGroupedByCategory({ search, category, author })
+    }, {
+        isAuth: true,
+        query: t.Object({
+            search: t.Optional(t.String()),
+            category: t.Optional(t.String()),
+            author: t.Optional(t.String())
         })
     })
     .get('/:id', async ({ params: { id }, set }: any) => {
@@ -26,8 +39,12 @@ export const bookController = new Elysia({ prefix: '/books' })
         return book
 
     }, {
-        isAuth: true
-    })
+        isAuth: true,
+        params: t.Object({
+            id: t.String()
+        })
+    } as any)
+
     .post('/', async ({ body, set }: any) => {
         try {
             return await BookService.create(body)
@@ -78,5 +95,8 @@ export const bookController = new Elysia({ prefix: '/books' })
 
     }, {
         isAuth: true,
-        hasRole: ['LIBRARIAN', 'ADMIN']
-    })
+        hasRole: ['LIBRARIAN', 'ADMIN'],
+        params: t.Object({
+            id: t.String()
+        })
+    } as any)

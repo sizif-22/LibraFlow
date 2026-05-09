@@ -14,9 +14,7 @@ import {
   Users, 
   Upload, 
   UserCheck, 
-  FileText, 
   RefreshCcw, 
-  Bell, 
   DollarSign,
   ChevronRight,
   Loader2
@@ -81,7 +79,7 @@ export default function LibrarianDashboard() {
       <RoleGuard allowedRoles={['LIBRARIAN', 'ADMIN']}>
         <AdminLayout showSearch={true} searchPlaceholder="Global Archive Search">
           <header className="mb-10">
-            <h1 className="text-[36px] font-[800] leading-tight flex items-baseline">
+            <h1 className="text-[36px] font-extrabold leading-tight flex items-baseline">
               <span className="text-white">Librarian</span>
               <span className="text-[#888888] ml-2">Command</span>
             </h1>
@@ -93,9 +91,9 @@ export default function LibrarianDashboard() {
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <Book size={18} className="text-[#555555]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">ARCHIVE CAP</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">ARCHIVE CAP</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">
+              <div className="text-[40px] font-extrabold text-white mt-3 leading-none">
                 {stats.totalBooks.toLocaleString()}
               </div>
               <div className="text-[11px] text-[#555555] mt-2 uppercase tracking-wide">Total Volumes Listed</div>
@@ -104,9 +102,9 @@ export default function LibrarianDashboard() {
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <ArrowLeftRight size={18} className="text-[#555555]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">ACTIVE FLOW</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">ACTIVE FLOW</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">
+              <div className="text-[40px] font-extrabold text-white mt-3 leading-none">
                 {stats.activeBorrows.toLocaleString()}
               </div>
               <div className="text-[11px] text-[#555555] mt-2 uppercase tracking-wide">Current Borrows</div>
@@ -115,9 +113,9 @@ export default function LibrarianDashboard() {
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <AlertTriangle size={18} className="text-[#f87171]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">ESCALATIONS</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">ESCALATIONS</span>
               </div>
-              <div className="text-[40px] font-[800] text-[#f87171] mt-3 leading-none">
+              <div className="text-[40px] font-extrabold text-[#f87171] mt-3 leading-none">
                 {stats.overdueReturns}
               </div>
               <div className="text-[11px] text-[#555555] mt-2 uppercase tracking-wide">Overdue Returns</div>
@@ -126,9 +124,9 @@ export default function LibrarianDashboard() {
             <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
               <div className="flex justify-between items-start">
                 <Users size={18} className="text-[#555555]" />
-                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">ENGAGEMENT</span>
+                <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-medium">ENGAGEMENT</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">
+              <div className="text-[40px] font-extrabold text-white mt-3 leading-none">
                 {stats.totalUsers.toLocaleString()}
               </div>
               <div className="text-[11px] text-[#555555] mt-2 uppercase tracking-wide">System Members</div>
@@ -138,15 +136,13 @@ export default function LibrarianDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
             {/* Rapid Command Center */}
             <div>
-              <h3 className="text-[10px] text-[#555555] uppercase tracking-[0.2em] font-[600] mb-4">RAPID COMMAND CENTER</h3>
+              <h3 className="text-[10px] text-[#555555] uppercase tracking-[0.2em] font-semibold mb-4">RAPID COMMAND CENTER</h3>
               <div className="grid grid-cols-3 gap-4">
                 {[
                   { label: 'Ingest Assets', icon: Upload, path: '/librarian/books' },
                   { label: 'Verify Requests', icon: UserCheck, path: '/librarian/borrows' },
                   { label: 'Manage Returns', icon: RefreshCcw, path: '/librarian/returns' },
                   { label: 'Process Fines', icon: DollarSign, path: '/librarian/fines' },
-                  { label: 'User Directory', icon: Users, path: '/admin/dashboard' },
-                  { label: 'System Logs', icon: FileText, path: '#' },
                 ].map((action) => {
                   const Icon = action.icon;
                   return (
@@ -156,7 +152,7 @@ export default function LibrarianDashboard() {
                       className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[28px] flex flex-col items-center justify-center cursor-pointer hover:border-[#444444] transition-all group active:scale-95"
                     >
                       <Icon size={24} className="text-[#888888] mb-4 group-hover:text-white transition-all" />
-                      <span className="text-[13px] font-[600] text-white text-center">{action.label}</span>
+                      <span className="text-[13px] font-semibold text-white text-center">{action.label}</span>
                     </div>
                   );
                 })}
@@ -167,7 +163,7 @@ export default function LibrarianDashboard() {
             <div>
               <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[28px]">
                 <div className="flex justify-between items-center mb-8">
-                  <span className="text-[10px] text-[#555555] uppercase tracking-[0.2em] font-[600]">LIVE INSIGHTS</span>
+                  <span className="text-[10px] text-[#555555] uppercase tracking-[0.2em] font-semibold">LIVE INSIGHTS</span>
                   <span className="text-[9px] text-[#4ade80] bg-[#064e3b] px-[6px] py-[2px] rounded-[4px] uppercase tracking-tighter font-bold">ACTIVE</span>
                 </div>
 
@@ -180,7 +176,7 @@ export default function LibrarianDashboard() {
                   ].map((metric) => (
                     <div key={metric.label} className="flex justify-between items-center py-4 border-b border-[#1f1f1f]">
                       <span className="text-[13px] text-[#888888]">{metric.label}</span>
-                      <span className={`text-[13px] font-[600] ${metric.label === 'System Status' ? 'text-[#4ade80]' : 'text-white'}`}>
+                      <span className={`text-[13px] font-semibold ${metric.label === 'System Status' ? 'text-[#4ade80]' : 'text-white'}`}>
                         {metric.value}
                       </span>
                     </div>
@@ -189,7 +185,7 @@ export default function LibrarianDashboard() {
 
                 <button 
                   onClick={() => router.push('/librarian/borrows')}
-                  className="w-full bg-white text-black text-[13px] font-[600] rounded-[6px] h-[48px] mt-10 hover:bg-[#eeeeee] transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
+                  className="w-full bg-white text-black text-[13px] font-semibold rounded-[6px] h-[48px] mt-10 hover:bg-[#eeeeee] transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
                 >
                   Process Requests <ChevronRight size={14} />
                 </button>
