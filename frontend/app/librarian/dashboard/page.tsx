@@ -43,8 +43,8 @@ export default function LibrarianDashboard() {
           api.get('/admin/users')
         ]);
 
-        const s = statsRes.data;
-        const uData = usersRes.data || [];
+        const s = statsRes.data as any;
+        const uData = usersRes.data as any || [];
 
         setStats({
           pendingBorrows: s.pendingBorrows,

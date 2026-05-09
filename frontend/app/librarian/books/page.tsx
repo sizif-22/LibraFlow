@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -13,7 +14,6 @@ import {
   Trash2, 
   BarChart, 
   Loader2,
-  ChevronLeft,
   ChevronRight
 } from 'lucide-react';
 import {
@@ -41,6 +41,9 @@ export default function LibrarianBooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -60,12 +63,17 @@ export default function LibrarianBooksPage() {
       fetchBooks();
       fetchStats();
     }
-  }, [token]);
+  }, [token, page, searchTerm]);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   const fetchStats = async () => {
     try {
       const response = await api.get('/admin/stats');
-      setStats(response.data);
+      setStats(response.data as any);
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }
@@ -74,14 +82,15 @@ export default function LibrarianBooksPage() {
   const fetchBooks = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get('/books');
-      const data = response.data as { books?: Book[], pagination?: { total: number } } | Book[];
+      const response = await api.get(`/books?page=${page}&limit=${limit}&search=${searchTerm}`);
+      const data = response.data as { books?: Book[], pagination?: { total: number, totalPages: number } } | Book[];
       const bookData = Array.isArray(data) ? data : data.books || [];
       const totalCount = Array.isArray(data) ? bookData.length : data.pagination?.total || bookData.length;
+      const totalP = Array.isArray(data) ? 1 : data.pagination?.totalPages || 1;
       
       setBooks(bookData as Book[]);
       setTotalBooks(totalCount);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setTotalPages(totalP);
     } catch (err: any) {
       if (err.response?.status !== 401) {
         console.error('Failed to fetch books:', err);
@@ -96,7 +105,6 @@ export default function LibrarianBooksPage() {
     try {
       await api.delete(`/books/${bookToDelete}`);
       fetchBooks();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to delete book. It might have active borrows.');
     } finally {
@@ -120,28 +128,25 @@ export default function LibrarianBooksPage() {
     setIsModalOpen(true);
   };
 
-  const filteredBooks = Array.isArray(books) 
-    ? books.filter(book => 
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [];
-
   return (
     <ProtectedRoute>
       <RoleGuard allowedRoles={['LIBRARIAN', 'ADMIN']}>
-        <AdminLayout showSearch={true} searchPlaceholder="Search Archives...">
+        <AdminLayout 
+          showSearch={true} 
+          searchPlaceholder="Search Archives..."
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+        >
           <header className="flex justify-between items-end mb-10">
             <div>
-              <h1 className="text-[32px] font-[800] text-white uppercase tracking-tight">Archival Catalog</h1>
+              <h1 className="text-[32px] font-extrabold text-white uppercase tracking-tight">Archival Catalog</h1>
               <p className="text-[14px] text-[#888888] mt-2 max-w-[500px] leading-relaxed">
                 Manage the university&apos;s collection of academic resources. Curate entries with editorial precision to maintain the integrity of the archive.
               </p>
             </div>
             <button
               onClick={handleAddNew}
-              className="bg-white text-black px-[24px] py-[12px] rounded-[6px] font-[600] text-[13px] hover:bg-[#eeeeee] transition-all flex items-center gap-2"
+              className="bg-white text-black px-[24px] py-[12px] rounded-[6px] font-semibold text-[13px] hover:bg-[#eeeeee] transition-all flex items-center gap-2"
             >
               <Plus size={16} />
               Add New Book
@@ -156,8 +161,8 @@ export default function LibrarianBooksPage() {
               { label: 'System Health', value: stats.systemHealth, italic: true },
             ].map((stat) => (
               <div key={stat.label} className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px]">
-                <div className="text-[11px] text-[#888888] uppercase tracking-wider font-[500]">{stat.label}</div>
-                <div className={`text-white mt-2 ${stat.italic ? 'text-[20px] italic font-[400]' : 'text-[36px] font-[800]'}`}>
+                <div className="text-[11px] text-[#888888] uppercase tracking-wider font-medium">{stat.label}</div>
+                <div className={`text-white mt-2 ${stat.italic ? 'text-[20px] italic font-normal' : 'text-[36px] font-extrabold'}`}>
                   {stat.value}
                 </div>
               </div>
@@ -168,7 +173,7 @@ export default function LibrarianBooksPage() {
           <div className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] overflow-hidden">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-[#2a2a2a] text-[12px] text-[#555555] uppercase tracking-widest font-[500]">
+                <tr className="border-b border-[#2a2a2a] text-[12px] text-[#555555] uppercase tracking-widest font-medium">
                   <th className="px-6 py-4">Asset Identity</th>
                   <th className="px-6 py-4">Classification</th>
                   <th className="px-6 py-4">Stock Availability</th>
@@ -182,8 +187,8 @@ export default function LibrarianBooksPage() {
                       <Loader2 className="animate-spin text-white mx-auto" size={32} />
                     </td>
                   </tr>
-                ) : filteredBooks.length > 0 ? (
-                  filteredBooks.map((book) => (
+                ) : books.length > 0 ? (
+                  books.map((book) => (
                     <tr key={book.id} className="group">
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-4">
@@ -191,13 +196,13 @@ export default function LibrarianBooksPage() {
                             <BarChart size={18} className="text-[#555555]" />
                           </div>
                           <div>
-                            <div className="text-[15px] font-[600] text-white leading-tight">{book.title}</div>
+                            <div className="text-[15px] font-semibold text-white leading-tight">{book.title}</div>
                             <div className="text-[12px] text-[#555555] mt-1">{book.author}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <span className="bg-[#222222] border border-[#333333] text-white text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-[4px] font-[500]">
+                        <span className="bg-[#222222] border border-[#333333] text-white text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-[4px] font-medium">
                           {book.category}
                         </span>
                       </td>
@@ -241,11 +246,27 @@ export default function LibrarianBooksPage() {
             {/* Pagination Row */}
             <div className="px-6 py-4 flex items-center justify-between">
               <div className="text-[12px] text-[#555555]">
-                Showing {filteredBooks.length} of {totalBooks.toLocaleString()} entries
+                {totalBooks > 0 
+                  ? `Showing ${(page - 1) * limit + 1} to ${Math.min(page * limit, totalBooks)} of ${totalBooks.toLocaleString()} entries`
+                  : 'Showing 0 entries'
+                }
               </div>
               <div className="flex items-center gap-4">
-                <button className="text-[12px] text-[#555555] hover:text-white transition-all">Previous</button>
-                <button className="bg-transparent border border-[#333333] text-white text-[12px] px-4 py-1.5 rounded-[6px] hover:border-[#444444] transition-all flex items-center gap-2">
+                <button 
+                  disabled={page <= 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className="text-[12px] text-[#555555] hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <div className="text-white text-[12px] font-medium px-2">
+                  Page {page} of {totalPages}
+                </div>
+                <button 
+                  disabled={page >= totalPages}
+                  onClick={() => setPage(p => p + 1)}
+                  className="bg-transparent border border-[#333333] text-white text-[12px] px-4 py-1.5 rounded-[6px] hover:border-[#444444] transition-all flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
                   Next Page <ChevronRight size={14} />
                 </button>
               </div>
@@ -263,7 +284,7 @@ export default function LibrarianBooksPage() {
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent className="bg-[#111111] border border-[#222222] rounded-[16px] max-w-[400px]">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-white font-[800] uppercase tracking-tight">Confirm Deletion</AlertDialogTitle>
+              <AlertDialogTitle className="text-white font-extrabold uppercase tracking-tight">Confirm Deletion</AlertDialogTitle>
               <AlertDialogDescription className="text-[#888888] text-[14px]">
                 Are you sure you want to delete this book from the archival catalog? This action cannot be undone.
               </AlertDialogDescription>

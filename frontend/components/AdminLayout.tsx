@@ -9,13 +9,17 @@ interface AdminLayoutProps {
   showSearch?: boolean;
   searchPlaceholder?: string;
   pageTitle?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export default function AdminLayout({ 
   children, 
   showSearch, 
   searchPlaceholder,
-  pageTitle
+  pageTitle,
+  searchValue,
+  onSearchChange
 }: AdminLayoutProps) {
   return (
     <div className="flex min-h-screen bg-[#0d0d0d]">
@@ -26,6 +30,8 @@ export default function AdminLayout({
           showSearch={showSearch} 
           searchPlaceholder={searchPlaceholder}
           pageTitle={pageTitle}
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
         />
         
         <main className="flex-1 p-[40px] px-[48px] overflow-auto">
