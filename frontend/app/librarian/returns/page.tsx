@@ -79,8 +79,8 @@ export default function LibrarianReturnsPage() {
               { label: 'TOTAL SHELVED', value: stats.totalShelved.toLocaleString() },
             ].map((stat) => (
               <div key={stat.label} className="bg-[#1a1a1a] border border-[#222222] rounded-[10px] p-[24px] px-[28px]">
-                <div className="text-[10px] text-[#666666] uppercase tracking-widest font-[500]">{stat.label}</div>
-                <div className="text-[40px] font-[800] text-white mt-2 leading-none">{stat.value}</div>
+                <div className="text-[10px] text-[#666666] uppercase tracking-widest font-medium">{stat.label}</div>
+                <div className="text-[40px] font-extrabold text-white mt-2 leading-none">{stat.value}</div>
               </div>
             ))}
           </div>
@@ -92,32 +92,32 @@ export default function LibrarianReturnsPage() {
             ) : borrows.length === 0 ? (
               <>
                 <Archive size={48} className="text-[#333333] mb-5" />
-                <h2 className="text-[24px] font-[800] text-white mb-4">No Pending Returns</h2>
+                <h2 className="text-[24px] font-extrabold text-white mb-4">No Pending Returns</h2>
                 <p className="text-[14px] text-[#666666] max-w-[400px] leading-relaxed mb-8">
                   Everything is currently accounted for. The library&apos;s circulation is currently in perfect equilibrium.
                 </p>
-                <button className="bg-transparent border border-[#333333] text-white text-[13px] font-[500] px-[28px] py-[12px] rounded-[6px] hover:border-[#444444] transition-all">
+                <button className="bg-transparent border border-[#333333] text-white text-[13px] font-medium px-[28px] py-[12px] rounded-[6px] hover:border-[#444444] transition-all">
                   View Circulation History
                 </button>
               </>
             ) : (
               <div className="w-full">
-                <h2 className="text-[20px] font-[700] text-white mb-6">Active Borrows</h2>
+                <h2 className="text-[20px] font-bold text-white mb-6">Active Borrows</h2>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
                       <tr className="border-b border-[#333333]">
-                        <th className="pb-3 text-[12px] font-[600] text-[#888888] uppercase tracking-wider">Book</th>
-                        <th className="pb-3 text-[12px] font-[600] text-[#888888] uppercase tracking-wider">Student</th>
-                        <th className="pb-3 text-[12px] font-[600] text-[#888888] uppercase tracking-wider">Due Date</th>
-                        <th className="pb-3 text-[12px] font-[600] text-[#888888] uppercase tracking-wider text-right">Action</th>
+                        <th className="pb-3 text-[12px] font-semibold text-[#888888] uppercase tracking-wider">Book</th>
+                        <th className="pb-3 text-[12px] font-semibold text-[#888888] uppercase tracking-wider">Student</th>
+                        <th className="pb-3 text-[12px] font-semibold text-[#888888] uppercase tracking-wider">Due Date</th>
+                        <th className="pb-3 text-[12px] font-semibold text-[#888888] uppercase tracking-wider text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {borrows.map((borrow) => (
                         <tr key={borrow.id} className="border-b border-[#2a2a2a]">
                           <td className="py-4">
-                            <div className="text-[14px] text-white font-[500]">{borrow.book.title}</div>
+                            <div className="text-[14px] text-white font-medium">{borrow.book.title}</div>
                             <div className="text-[12px] text-[#666666]">{borrow.book.isbn}</div>
                           </td>
                           <td className="py-4">
@@ -139,7 +139,7 @@ export default function LibrarianReturnsPage() {
                                   console.error('Failed to return book', err);
                                 }
                               }}
-                              className="bg-white text-black text-[12px] font-[600] px-[16px] py-[8px] rounded-[6px] hover:bg-[#dddddd] transition-all"
+                              className="bg-white text-black text-[12px] font-semibold px-[16px] py-[8px] rounded-[6px] hover:bg-[#dddddd] transition-all"
                             >
                               Process Return
                             </button>

@@ -31,14 +31,14 @@ function BorrowRequestCard({
   return (
     <div className="bg-[#1a1a1a] border border-[#222222] rounded-[12px] p-[28px] flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <span className="bg-transparent border border-[#444444] text-white text-[10px] uppercase tracking-widest px-[10px] py-[3px] rounded-[4px] font-[500]">
+        <span className="bg-transparent border border-[#444444] text-white text-[10px] uppercase tracking-widest px-[10px] py-[3px] rounded-[4px] font-medium">
           PENDING
         </span>
         <span className="text-[11px] text-[#555555]">ID: #BR-89{borrow.id}</span>
       </div>
 
       <div className="flex-1">
-        <h3 className="text-[24px] font-[800] text-white leading-[1.2] mb-1">
+        <h3 className="text-[24px] font-extrabold text-white leading-[1.2] mb-1">
           {borrow.book.title}
         </h3>
         <p className="text-[13px] text-[#666666] mb-6">
@@ -48,15 +48,15 @@ function BorrowRequestCard({
         <div className="space-y-3 mb-8">
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-[#555555] uppercase tracking-widest">BORROWER</span>
-            <span className="text-[14px] text-white font-[500]">{borrow.student.name}</span>
+            <span className="text-[14px] text-white font-medium">{borrow.student.name}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-[#555555] uppercase tracking-widest">FACULTY</span>
-            <span className="text-[14px] text-white font-[500]">Department of Research</span>
+            <span className="text-[14px] text-white font-medium">Department of Research</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-[#555555] uppercase tracking-widest">DURATION</span>
-            <span className="text-[14px] text-white font-[500]">14 Days (Standard)</span>
+            <span className="text-[14px] text-white font-medium">14 Days (Standard)</span>
           </div>
         </div>
       </div>
@@ -65,14 +65,14 @@ function BorrowRequestCard({
         <button
           onClick={() => onReject(borrow.id)}
           disabled={isActing}
-          className="flex-1 bg-[#1a1a1a] border border-[#333333] text-white text-[12px] font-[600] uppercase rounded-[6px] h-[44px] hover:bg-[#222222] transition-all disabled:opacity-50"
+          className="flex-1 bg-[#1a1a1a] border border-[#333333] text-white text-[12px] font-semibold uppercase rounded-[6px] h-[44px] hover:bg-[#222222] transition-all disabled:opacity-50"
         >
           {isActing ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'REJECT'}
         </button>
         <button
           onClick={() => onApprove(borrow.id)}
           disabled={isActing}
-          className="flex-1 bg-white text-black text-[12px] font-[600] uppercase rounded-[6px] h-[44px] hover:bg-[#eeeeee] transition-all disabled:opacity-50"
+          className="flex-1 bg-white text-black text-[12px] font-semibold uppercase rounded-[6px] h-[44px] hover:bg-[#eeeeee] transition-all disabled:opacity-50"
         >
           {isActing ? <Loader2 size={14} className="animate-spin mx-auto text-black" /> : 'APPROVE'}
         </button>
@@ -96,7 +96,6 @@ export default function LibrarianBorrowsPage() {
     try {
       const data = await getPendingBorrows();
       setBorrows(data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.response?.status !== 401) {
         console.error('Failed to fetch pending borrows:', err);
@@ -154,19 +153,19 @@ export default function LibrarianBorrowsPage() {
         <AdminLayout showSearch={false}>
           <header className="flex justify-between items-start mb-12">
             <div>
-              <h1 className="text-[40px] font-[800] text-white leading-tight">Borrow Requests</h1>
+              <h1 className="text-[40px] font-extrabold text-white leading-tight">Borrow Requests</h1>
               <p className="text-[14px] text-[#888888] mt-2 max-w-[500px] leading-relaxed">
                 Review and authorize academic material circulation across the university network. Precision in archiving is paramount.
               </p>
             </div>
             <div className="flex gap-12 text-right">
               <div>
-                <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-1 font-[600]">PENDING TOTAL</div>
-                <div className="text-[28px] font-[800] text-white">{borrows.length}</div>
+                <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-1 font-semibold">PENDING TOTAL</div>
+                <div className="text-[28px] font-extrabold text-white">{borrows.length}</div>
               </div>
               <div>
-                <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-1 font-[600]">AVG RESPONSE</div>
-                <div className="text-[28px] font-[800] text-white">{stats.avgResponse}</div>
+                <div className="text-[10px] text-[#666666] uppercase tracking-[0.2em] mb-1 font-semibold">AVG RESPONSE</div>
+                <div className="text-[28px] font-extrabold text-white">{stats.avgResponse}</div>
               </div>
             </div>
           </header>
