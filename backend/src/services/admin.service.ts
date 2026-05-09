@@ -1,5 +1,6 @@
 import prisma from '../db/client'
-import { Role, BorrowStatus } from '@prisma/client'
+import { BorrowStatus } from '@prisma/client'
+import { EmailService } from './email.service'
 
 export const AdminService = {
     async listUsers() {
@@ -20,7 +21,7 @@ export const AdminService = {
         const { email, password, name, role } = data
         const { hashPassword } = await import('../utils/password')
         const hashedPassword = await hashPassword(password)
-        return await prisma.user.create({
+        const user = await prisma.user.create({
             data: {
                 email,
                 name,
@@ -35,6 +36,11 @@ export const AdminService = {
                 isActive: true,
             },
         })
+
+        // Send Welcome Email
+        await EmailService.sendWelcomeEmail(email, name);
+
+        return user;
     },
 
     async changeUserStatus(userId: number, isActive: boolean) {
@@ -111,4 +117,23 @@ export const AdminService = {
             totalCollected: result._sum.amount || 0,
         }
     },
+
+    async getSystemHealth() {
+        try {
+            await prisma.$queryRaw`SELECT 1`;
+            return {
+                database: 'connected',
+                apiGateway: 'online',
+                notificationService: 'active',
+                timestamp: new Date().toISOString()
+            }
+        } catch (error) {
+            return {
+                database: 'disconnected',
+                apiGateway: 'online',
+                notificationService: 'degraded',
+                timestamp: new Date().toISOString()
+            }
+        }
+    }
 }

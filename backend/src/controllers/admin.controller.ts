@@ -97,3 +97,13 @@ export const adminController = new Elysia({ prefix: '/admin' })
             summary: 'Manually trigger due date reminders',
         },
     })
+    .get('/system/health', async () => {
+        return await AdminService.getSystemHealth()
+    }, {
+        isAuth: true,
+        hasRole: ['ADMIN'],
+        detail: {
+            tags: ['Admin'],
+            summary: 'Get system health status',
+        },
+    })

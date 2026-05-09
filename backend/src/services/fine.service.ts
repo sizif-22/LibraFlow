@@ -1,4 +1,5 @@
 import { FineRepository } from '../repositories/FineRepository';
+import { EmailService } from './email.service';
 import { BorrowRepository } from '../repositories/BorrowRepository';
 import { FineCalculator } from '../strategies/fines/FineCalculator';
 import { PerDayFine } from '../strategies/fines/PerDayFine';
@@ -49,6 +50,15 @@ export class FineService {
                 `A fine of ${amount} EGP has been added for returning "${borrow.book.title}" late.`,
                 NotificationType.FINE_ADDED
             );
+
+            // Send Email Notification
+            await EmailService.sendFineNotification(
+                borrow.student.email,
+                borrow.student.name,
+                borrow.book.title,
+                amount.toString()
+            );
+
             return fine;
         }
 

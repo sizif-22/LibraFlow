@@ -25,3 +25,9 @@ export interface OverdueBorrowReport {
 export interface FineReport {
   totalCollected: number;
 }
+export interface SystemHealth {
+  database: 'connected' | 'disconnected';
+  apiGateway: 'online' | 'offline';
+  notificationService: 'active' | 'degraded';
+  timestamp: string;
+}

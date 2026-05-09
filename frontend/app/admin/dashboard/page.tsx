@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import RoleGuard from '@/components/RoleGuard';
 import { adminApi } from '@/lib/api/admin';
-import { User, TopBookReport, OverdueBorrowReport, FineReport } from '@/lib/types/admin';
+import { User, TopBookReport, OverdueBorrowReport, FineReport, SystemHealth } from '@/lib/types/admin';
 import { 
   Users, Clock, DollarSign, 
   Settings, Shield, UserCheck, UserX,
@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [overdueBorrows, setOverdueBorrows] = useState<OverdueBorrowReport[]>([]);
   const [fineReport, setFineReport] = useState<FineReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
+  const [growth, setGrowth] = useState<string>('+0%');
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -42,16 +44,32 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [u, tb, ob, fr] = await Promise.all([
+      const [u, tb, ob, fr, health] = await Promise.all([
         adminApi.getUsers(),
         adminApi.getTopBooksReport(),
         adminApi.getOverdueBorrowsReport(),
         adminApi.getFinesReport(),
+        adminApi.getSystemHealth(),
       ]);
       setUsers(u);
       setTopBooks(tb);
       setOverdueBorrows(ob);
       setFineReport(fr);
+      setSystemHealth(health);
+      
+      // Calculate Growth (Users in last 30 days)
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+      const newUsers = u.filter(user => new Date(user.createdAt) > thirtyDaysAgo).length;
+      const previousTotal = u.length - newUsers;
+      
+      if (previousTotal === 0) {
+        setGrowth(newUsers > 0 ? `+${newUsers * 100}%` : '0%');
+      } else {
+        const percentage = Math.round((newUsers / previousTotal) * 100);
+        setGrowth(`+${percentage}%`);
+      }
+
     } catch (err: any) {
       if (err.response?.status !== 401) {
         console.error('Failed to fetch admin data:', err);
@@ -145,7 +163,7 @@ export default function AdminDashboard() {
                 <TrendingUp size={18} className="text-[#555555]" />
                 <span className="text-[10px] text-[#666666] uppercase tracking-[0.15em] font-[500]">GROWTH</span>
               </div>
-              <div className="text-[40px] font-[800] text-white mt-3 leading-none">+12%</div>
+              <div className="text-[40px] font-[800] text-white mt-3 leading-none">{growth}</div>
             </div>
           </div>
 
@@ -301,21 +319,17 @@ export default function AdminDashboard() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-[12px] bg-[#111111] rounded-[6px] border border-[#222222]">
                     <span className="text-[12px] text-[#888888] font-[500]">Database Connection</span>
-                    <span className="w-[6px] h-[6px] rounded-full bg-[#4ade80]" />
+                    <span className={`w-[6px] h-[6px] rounded-full ${systemHealth?.database === 'connected' ? 'bg-[#4ade80]' : 'bg-[#f87171]'}`} />
                   </div>
                   <div className="flex items-center justify-between p-[12px] bg-[#111111] rounded-[6px] border border-[#222222]">
                     <span className="text-[12px] text-[#888888] font-[500]">API Gateway</span>
-                    <span className="w-[6px] h-[6px] rounded-full bg-[#4ade80]" />
+                    <span className={`w-[6px] h-[6px] rounded-full ${systemHealth?.apiGateway === 'online' ? 'bg-[#4ade80]' : 'bg-[#f87171]'}`} />
                   </div>
                   <div className="flex items-center justify-between p-[12px] bg-[#111111] rounded-[6px] border border-[#222222]">
                     <span className="text-[12px] text-[#888888] font-[500]">Notification Service</span>
-                    <span className="w-[6px] h-[6px] rounded-full bg-[#4ade80]" />
+                    <span className={`w-[6px] h-[6px] rounded-full ${systemHealth?.notificationService === 'active' ? 'bg-[#4ade80]' : 'bg-[#f87171]'}`} />
                   </div>
                 </div>
-                <button className="w-full mt-6 h-[40px] rounded-[6px] bg-[#222222] hover:bg-[#333333] text-white text-[12px] font-[600] uppercase tracking-wider transition-all flex items-center justify-center gap-2">
-                  View System Logs
-                  <ArrowRight size={14} />
-                </button>
               </div>
             </div>
 
