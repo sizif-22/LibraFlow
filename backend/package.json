@@ -22,7 +22,8 @@
     "dev": "bun --watch src/index.ts",
     "build": "prisma generate",
     "start": "bun src/index.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prisma:deploy": "prisma migrate deploy"
   },
   "prisma": {
     "seed": "bun prisma/seed.ts"
