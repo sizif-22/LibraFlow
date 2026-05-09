@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to LibraFlow</title>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #000000; margin: 0; padding: 0; color: #ffffff; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #111111; border: 1px solid #222222; border-radius: 12px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; }
+        .header { padding: 40px; text-align: center; border-bottom: 1px solid #222222; }
+        .logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .logo-flow { color: #888888; }
+        .content { padding: 40px; }
+        h1 { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: #ffffff; }
+        p { color: #888888; line-height: 1.6; font-size: 15px; }
+        .button { display: inline-block; padding: 14px 32px; background-color: #ffffff; color: #000000; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 32px; text-transform: uppercase; letter-spacing: 1px; }
+        .footer { padding: 32px; text-align: center; border-top: 1px solid #222222; background-color: #0a0a0a; }
+        .footer-text { font-size: 12px; color: #444444; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Libra<span class="logo-flow">Flow</span></div>
+        </div>
+        <div class="content">
+            <h1>Welcome to the Command Center, {{name}}!</h1>
+            <p>Your account has been successfully created. You can now access the LibraFlow library management system to browse books, manage your borrows, and track your library activity.</p>
+            <p>Your registered email: <strong>{{email}}</strong></p>
+            <a href="{{loginUrl}}" class="button">Access Dashboard</a>
+        </div>
+        <div class="footer">
+            <div class="footer-text">SYSTEM GENERATED • DO NOT REPLY</div>
+        </div>
+    </div>
+</body>
+</html>

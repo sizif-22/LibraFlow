@@ -11,21 +11,39 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { token, user, isLoading } = useAuth();
+  const { token, user, isLoading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
       if (!token) {
         router.push('/login');
-      } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-        // Redirect based on role if not authorized
-        if (user.role === 'ADMIN') {
-          router.push('/admin/dashboard');
-        } else if (user.role === 'LIBRARIAN') {
-          router.push('/librarian/dashboard');
-        } else {
+      } else if (user) {
+        // 1. Check Activity (Admin Ban)
+        if (!user.isActive) {
+          logout();
+          router.push('/login?error=banned');
+          return;
+        }
+
+        // 2. Check Verification (Email Activation)
+        const isActivationPage = window.location.pathname === '/activate';
+        if (!user.isVerified && !isActivationPage) {
+          router.push('/activate');
+          return;
+        }
+
+        // 3. Prevent verified users from accessing activation page
+        if (user.isVerified && isActivationPage) {
           router.push('/');
+          return;
+        }
+
+        // 4. Role Authorization
+        if (allowedRoles && !allowedRoles.includes(user.role)) {
+          if (user.role === 'ADMIN') router.push('/admin/dashboard');
+          else if (user.role === 'LIBRARIAN') router.push('/librarian/dashboard');
+          else router.push('/student/dashboard');
         }
       }
     }
@@ -40,6 +58,8 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   }
 
   if (!token) return null;
+  if (user && !user.isActive) return null;
+  if (user && !user.isVerified && window.location.pathname !== '/activate') return null;
   if (allowedRoles && user && !allowedRoles.includes(user.role)) return null;
 
   return <>{children}</>;

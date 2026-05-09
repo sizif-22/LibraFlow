@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overdue Warning</title>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #000000; margin: 0; padding: 0; color: #ffffff; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #111111; border: 1px solid #222222; border-radius: 12px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; }
+        .header { padding: 40px; text-align: center; border-bottom: 1px solid #222222; }
+        .logo { font-size: 24px; font-weight: 800; }
+        .logo-flow { color: #888888; }
+        .content { padding: 40px; }
+        .status-badge { display: inline-block; padding: 6px 12px; background-color: #450a0a; color: #f87171; font-size: 10px; font-weight: 700; text-transform: uppercase; border-radius: 4px; letter-spacing: 1px; margin-bottom: 16px; }
+        h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffffff; }
+        .book-title { font-size: 18px; font-weight: 600; color: #ffffff; margin-top: 24px; }
+        .warning-box { margin-top: 32px; padding: 24px; background-color: #1a0808; border: 1px solid #331111; border-radius: 8px; }
+        .warning-text { color: #f87171; font-size: 14px; line-height: 1.6; }
+        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222222; }
+        .detail-label { color: #555555; font-size: 12px; text-transform: uppercase; font-weight: 600; }
+        .detail-value { color: #aaaaaa; font-size: 14px; }
+        .footer { padding: 32px; text-align: center; border-top: 1px solid #222222; background-color: #0a0a0a; }
+        .footer-text { font-size: 12px; color: #444444; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Libra<span class="logo-flow">Flow</span></div>
+        </div>
+        <div class="content">
+            <div class="status-badge">ACTION REQUIRED</div>
+            <h1>Library Overdue Notice</h1>
+            <p style="color: #666666;">Our system has detected that you have an item past its due date.</p>
+            
+            <div class="book-title">{{bookTitle}}</div>
+            
+            <div class="warning-box">
+                <div class="warning-text">
+                    Please return this book to the library immediately to avoid further fines and account restrictions.
+                </div>
+            </div>
+            
+            <div style="margin-top: 32px;">
+                <div class="detail-row">
+                    <span class="detail-label">Original Due Date</span>
+                    <span class="detail-value" style="color: #f87171;">{{dueDate}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Borrower</span>
+                    <span class="detail-value">{{name}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="footer-text">SYSTEM GENERATED • AUTOMATED REMINDER</div>
+        </div>
+    </div>
+</body>
+</html>

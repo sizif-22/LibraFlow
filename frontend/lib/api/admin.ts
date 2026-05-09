@@ -1,5 +1,5 @@
 import api from '../api';
-import { User, TopBookReport, OverdueBorrowReport, FineReport } from '../types/admin';
+import { User, TopBookReport, OverdueBorrowReport, FineReport, SystemHealth } from '../types/admin';
 
 export const adminApi = {
   getUsers: async (): Promise<User[]> => {
@@ -35,5 +35,10 @@ export const adminApi = {
   triggerReminders: async (): Promise<{ message: string; count: number }> => {
     const response = await api.post('/admin/reminders/trigger');
     return response.data as { message: string; count: number };
+  },
+  
+  getSystemHealth: async (): Promise<SystemHealth> => {
+    const response = await api.get('/admin/system/health');
+    return response.data as SystemHealth;
   },
 };

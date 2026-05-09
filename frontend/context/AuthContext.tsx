@@ -8,6 +8,8 @@ export interface User {
   name: string;
   email: string;
   role: 'STUDENT' | 'LIBRARIAN' | 'ADMIN';
+  isActive: boolean;
+  isVerified: boolean;
 }
 
 
@@ -26,10 +28,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: User | null;
     token: string | null;
     isLoading: boolean;
-  }>({
-    user: null,
-    token: null,
-    isLoading: true,
+  }>(() => {
+    // Initial state logic (Lazy Initializer)
+    if (typeof window === 'undefined') {
+      return { user: null, token: null, isLoading: true };
+    }
+
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+
+    if (storedToken && storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        return {
+          token: storedToken,
+          user: { isActive: true, isVerified: true, ...parsedUser },
+          isLoading: false,
+        };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+    return { user: null, token: null, isLoading: false };
   });
 
   const logout = React.useCallback(() => {
@@ -43,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = React.useCallback((newToken: string, newUser: User) => {
-    console.log('Login function called. Setting token and user.');
     setAuthState({
       token: newToken,
       user: newUser,
@@ -70,36 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     window.addEventListener('auth-error', handleAuthError);
     return () => window.removeEventListener('auth-error', handleAuthError);
-  }, [logout]);
-
-
-
-
-  const hasInitialized = React.useRef(false);
-
-  useEffect(() => {
-    if (hasInitialized.current) return;
-
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-
-    if (storedToken && storedUser) {
-      try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setAuthState({
-          token: storedToken,
-          user: JSON.parse(storedUser),
-          isLoading: false,
-        });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e) {
-        logout();
-      }
-    } else {
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-    }
-    
-    hasInitialized.current = true;
   }, [logout]);
 
 

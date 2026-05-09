@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Confirmation</title>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #000000; margin: 0; padding: 0; color: #ffffff; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #111111; border: 1px solid #222222; border-radius: 12px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; }
+        .header { padding: 40px; text-align: center; border-bottom: 1px solid #222222; }
+        .logo { font-size: 24px; font-weight: 800; }
+        .logo-flow { color: #888888; }
+        .content { padding: 40px; }
+        .status-badge { display: inline-block; padding: 6px 12px; background-color: #1a1a1a; color: #ffffff; font-size: 10px; font-weight: 700; text-transform: uppercase; border-radius: 4px; letter-spacing: 1px; margin-bottom: 16px; border: 1px solid #333333; }
+        h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffffff; }
+        .book-title { font-size: 18px; font-weight: 600; color: #ffffff; margin-top: 24px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222222; }
+        .detail-label { color: #555555; font-size: 12px; text-transform: uppercase; font-weight: 600; }
+        .detail-value { color: #aaaaaa; font-size: 14px; }
+        .footer { padding: 32px; text-align: center; border-top: 1px solid #222222; background-color: #0a0a0a; }
+        .footer-text { font-size: 12px; color: #444444; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Libra<span class="logo-flow">Flow</span></div>
+        </div>
+        <div class="content">
+            <div class="status-badge">RETURNED TO SHELF</div>
+            <h1>Return Confirmed</h1>
+            <p style="color: #666666;">The following book has been successfully returned to the library inventory.</p>
+            
+            <div class="book-title">{{bookTitle}}</div>
+            
+            <div style="margin-top: 32px;">
+                <div class="detail-row">
+                    <span class="detail-label">Return Date</span>
+                    <span class="detail-value">{{returnDate}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value" style="color: #ffffff;">COMPLETED</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="footer-text">SYSTEM GENERATED • INVENTORY UPDATED</div>
+        </div>
+    </div>
+</body>
+</html>

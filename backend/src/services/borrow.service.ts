@@ -1,4 +1,5 @@
 import prisma from '../db/client'
+import { EmailService } from './email.service'
 import { BorrowType, BorrowStatus } from '../types/borrow'
 import { BorrowRepository } from '../repositories/BorrowRepository'
 import { FineRepository } from '../repositories/FineRepository'
@@ -107,6 +108,14 @@ export const BorrowService = {
             NotificationType.BORROW_APPROVED
         )
 
+        // Send Email Notification
+        await EmailService.sendBorrowConfirmation(
+            updatedBorrow.student.email,
+            updatedBorrow.student.name,
+            updatedBorrow.book.title,
+            dueDate.toDateString()
+        )
+
         return updatedBorrow
     },
 
@@ -175,6 +184,13 @@ export const BorrowService = {
                 data:  { available: { increment: 1 } },
             }),
         ])
+
+        // Send Email Notification
+        await EmailService.sendReturnConfirmation(
+            updatedBorrow.student.email,
+            updatedBorrow.student.name,
+            updatedBorrow.book.title
+        )
 
         return updatedBorrow
     },
