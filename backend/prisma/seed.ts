@@ -132,7 +132,151 @@ async function main() {
             type: 'THESIS' as const,
             quantity: 1,
             available: 1
-        }
+        },
+        {
+            title: 'Brave New World',
+            author: 'Aldous Huxley',
+            isbn: '9780060850524',
+            category: 'Dystopian',
+            type: 'BOOK' as const,
+            quantity: 4,
+            available: 4
+        },
+        {
+            title: 'The Lord of the Rings',
+            author: 'J.R.R. Tolkien',
+            isbn: '9780544003415',
+            category: 'Fantasy',
+            type: 'BOOK' as const,
+            quantity: 3,
+            available: 3
+        },
+        {
+            title: 'Harry Potter and the Sorcerer\'s Stone',
+            author: 'J.K. Rowling',
+            isbn: '9780439708180',
+            category: 'Fantasy',
+            type: 'BOOK' as const,
+            quantity: 6,
+            available: 6
+        },
+        {
+            title: 'The Da Vinci Code',
+            author: 'Dan Brown',
+            isbn: '9780307474278',
+            category: 'Thriller',
+            type: 'BOOK' as const,
+            quantity: 5,
+            available: 5
+        },
+        {
+            title: 'The Alchemist',
+            author: 'Paulo Coelho',
+            isbn: '9780062315007',
+            category: 'Philosophy',
+            type: 'BOOK' as const,
+            quantity: 4,
+            available: 4
+        },
+        {
+            title: 'Sapiens: A Brief History of Humankind',
+            author: 'Yuval Noah Harari',
+            isbn: '9780062316110',
+            category: 'History',
+            type: 'BOOK' as const,
+            quantity: 3,
+            available: 3
+        },
+        {
+            title: 'Atomic Habits',
+            author: 'James Clear',
+            isbn: '9780735211292',
+            category: 'Self-Help',
+            type: 'BOOK' as const,
+            quantity: 7,
+            available: 7
+        },
+        {
+            title: 'The Lean Startup',
+            author: 'Eric Ries',
+            isbn: '9780307887894',
+            category: 'Business',
+            type: 'BOOK' as const,
+            quantity: 4,
+            available: 4
+        },
+        {
+            title: 'A Brief History of Time',
+            author: 'Stephen Hawking',
+            isbn: '9780553380163',
+            category: 'Science',
+            type: 'BOOK' as const,
+            quantity: 3,
+            available: 3
+        },
+        {
+            title: 'The Art of War',
+            author: 'Sun Tzu',
+            isbn: '9781590302255',
+            category: 'Philosophy',
+            type: 'BOOK' as const,
+            quantity: 5,
+            available: 5
+        },
+        {
+            title: 'Thinking, Fast and Slow',
+            author: 'Daniel Kahneman',
+            isbn: '9780374533557',
+            category: 'Psychology',
+            type: 'BOOK' as const,
+            quantity: 3,
+            available: 3
+        },
+        {
+            title: 'Forbes - July 2024',
+            author: 'Various',
+            isbn: 'MAG-FB-2024-07',
+            category: 'Business',
+            type: 'MAGAZINE' as const,
+            quantity: 6,
+            available: 6
+        },
+        {
+            title: 'The Economist - June 2024',
+            author: 'Various',
+            isbn: 'MAG-EC-2024-06',
+            category: 'News',
+            type: 'MAGAZINE' as const,
+            quantity: 7,
+            available: 7
+        },
+        {
+            title: 'Wired - August 2024',
+            author: 'Various',
+            isbn: 'MAG-WR-2024-08',
+            category: 'Technology',
+            type: 'MAGAZINE' as const,
+            quantity: 5,
+            available: 5
+        },
+        {
+            title: 'Machine Learning for Healthcare',
+            author: 'Dr. Nour Hassan',
+            isbn: 'TH-2025-003',
+            category: 'Technology',
+            type: 'THESIS' as const,
+            quantity: 1,
+            available: 1
+        },
+        {
+            title: 'Climate Change in the Nile Delta',
+            author: 'Mariam Ibrahim',
+            isbn: 'TH-2025-004',
+            category: 'Science',
+            type: 'THESIS' as const,
+            quantity: 1,
+            available: 1
+        },
     ]
 
     for (const book of books) {
