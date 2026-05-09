@@ -1,5 +1,5 @@
 ""
-const BASE_URL = "https://libraflow-816386b9e3df.herokuapp.com/api/";
+const BASE_URL = "https://libraflow-816386b9e3df.herokuapp.com/api";
 export interface ApiResponse<T = unknown> {
   data: T;
   status: number;
