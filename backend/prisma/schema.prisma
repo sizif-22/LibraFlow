@@ -43,6 +43,8 @@ model User {
   borrows       Borrow[]
   fines         Fine[]
   notifications Notification[]
+
+  @@map("user")
 }
 
 model Book {
@@ -59,6 +61,8 @@ model Book {
   updatedAt DateTime @updatedAt
 
   borrows   Borrow[]
+
+  @@map("book")
 }
 
 model Borrow {
@@ -76,6 +80,8 @@ model Borrow {
   updatedAt  DateTime     @updatedAt
 
   fine       Fine?
+
+  @@map("borrow")
 }
 
 /// Fine model — full implementation in Sprint 3
@@ -90,6 +96,8 @@ model Fine {
   paidAt    DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("fine")
 }
 
 model Notification {
@@ -100,6 +108,8 @@ model Notification {
   type      NotificationType
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@map("notification")
 }
 
 enum NotificationType {
