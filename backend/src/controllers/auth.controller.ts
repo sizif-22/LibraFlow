@@ -99,7 +99,9 @@ export const authController = new Elysia({ prefix: '/auth' })
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                    role: user.role
+                    role: user.role,
+                    isVerified: user.isVerified,
+                    isActive: user.isActive
                 }
             }
         } catch (e: any) {
@@ -121,7 +123,9 @@ export const authController = new Elysia({ prefix: '/auth' })
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                    role: user.role
+                    role: user.role,
+                    isVerified: user.isVerified,
+                    isActive: user.isActive
                 }
             }
         } catch (e: any) {
@@ -161,7 +165,9 @@ export const authController = new Elysia({ prefix: '/auth' })
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                role: user.role
+                role: user.role,
+                isVerified: user.isVerified,
+                isActive: user.isActive
             }
         }
     }, {
