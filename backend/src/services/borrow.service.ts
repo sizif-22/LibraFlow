@@ -1,7 +1,7 @@
-import prisma from '../db/client'
 import { EmailService } from './email.service'
 import { BorrowType, BorrowStatus } from '../types/borrow'
 import { BorrowRepository } from '../repositories/BorrowRepository'
+import { BookRepository } from '../repositories/BookRepository'
 import { FineRepository } from '../repositories/FineRepository'
 import { NotificationRepository } from '../repositories/NotificationRepository'
 import { BorrowFactory } from '../factories/borrow/BorrowFactory'
@@ -26,7 +26,7 @@ export const BorrowService = {
      */
     async requestBorrow(studentId: number, bookId: number) {
         // 1. Load book
-        const book = await prisma.book.findUnique({ where: { id: bookId } })
+        const book = await BookRepository.findById(bookId)
         if (!book) {
             throw new Error('Book not found')
         }
@@ -82,24 +82,7 @@ export const BorrowService = {
         const dueDate = borrowType.calculateDueDate()
 
         // Run approval + book decrement in a transaction
-        const [updatedBorrow] = await prisma.$transaction([
-            prisma.borrow.update({
-                where: { id: borrowId },
-                data: {
-                    status: BorrowStatus.APPROVED,
-                    dueDate,
-                },
-                include: {
-                    student: { select: { id: true, name: true, email: true, role: true } },
-                    book:    { select: { id: true, title: true, author: true, isbn: true, category: true } },
-                    fine:    true,
-                },
-            }),
-            prisma.book.update({
-                where: { id: borrow.bookId },
-                data:  { available: { decrement: 1 } },
-            }),
-        ])
+        const [updatedBorrow] = await BorrowRepository.approveTransaction(borrowId, dueDate, borrow.bookId)
 
         // Trigger notification
         await NotificationRepository.create(
@@ -166,24 +149,7 @@ export const BorrowService = {
         const returnDate = new Date()
 
         // Run return + book increment in a transaction
-        const [updatedBorrow] = await prisma.$transaction([
-            prisma.borrow.update({
-                where: { id: borrowId },
-                data: {
-                    status: BorrowStatus.RETURNED,
-                    returnDate,
-                },
-                include: {
-                    student: { select: { id: true, name: true, email: true, role: true } },
-                    book:    { select: { id: true, title: true, author: true, isbn: true, category: true } },
-                    fine:    true,
-                },
-            }),
-            prisma.book.update({
-                where: { id: borrow.bookId },
-                data:  { available: { increment: 1 } },
-            }),
-        ])
+        const [updatedBorrow] = await BorrowRepository.returnTransaction(borrowId, returnDate, borrow.bookId)
 
         // Send Email Notification
         await EmailService.sendReturnConfirmation(

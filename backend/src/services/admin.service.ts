@@ -1,42 +1,25 @@
-import prisma from '../db/client'
-import { BorrowStatus } from '@prisma/client'
 import { EmailService } from './email.service'
+import { UserRepository } from '../repositories/UserRepository'
+import { BookRepository } from '../repositories/BookRepository'
+import { BorrowRepository } from '../repositories/BorrowRepository'
+import { FineRepository } from '../repositories/FineRepository'
 
 export const AdminService = {
     async listUsers() {
-        return await prisma.user.findMany({
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-                createdAt: true,
-            },
-            orderBy: { createdAt: 'desc' },
-        })
+        return UserRepository.findAll()
     },
 
     async createUser(data: any) {
         const { email, password, name, role } = data
         const { hashPassword } = await import('../utils/password')
         const hashedPassword = await hashPassword(password)
-        const user = await prisma.user.create({
-            data: {
-                email,
-                name,
-                password: hashedPassword,
-                role,
-                isActive: true,
-                isVerified: false
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-            },
+        const user = await UserRepository.create({
+            email,
+            name,
+            password: hashedPassword,
+            role,
+            isVerified: false,
+            isActive: true,
         })
 
         // Send Welcome Email
@@ -46,38 +29,14 @@ export const AdminService = {
     },
 
     async changeUserStatus(userId: number, isActive: boolean) {
-        return await prisma.user.update({
-            where: { id: userId },
-            data: { isActive },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-            },
-        })
+        return UserRepository.updateStatus(userId, isActive)
     },
 
     async getTopBooks() {
-        const topBooks = await prisma.borrow.groupBy({
-            by: ['bookId'],
-            _count: {
-                bookId: true,
-            },
-            orderBy: {
-                _count: {
-                    bookId: 'desc',
-                },
-            },
-            take: 10,
-        })
+        const topBooks = await BorrowRepository.getTopBooks(10)
 
         const bookIds = topBooks.map((t) => t.bookId)
-        const books = await prisma.book.findMany({
-            where: { id: { in: bookIds } },
-            select: { id: true, title: true, author: true, category: true },
-        })
+        const books = await BookRepository.findByIds(bookIds)
 
         return topBooks.map((t) => {
             const book = books.find((b) => b.id === t.bookId)
@@ -89,100 +48,33 @@ export const AdminService = {
     },
 
     async getOverdueBorrows() {
-        const now = new Date()
-        return await prisma.borrow.findMany({
-            where: {
-                status: BorrowStatus.APPROVED,
-                dueDate: {
-                    lt: now,
-                },
-            },
-            include: {
-                student: { select: { id: true, name: true, email: true } },
-                book: { select: { id: true, title: true, isbn: true } },
-            },
-            orderBy: { dueDate: 'asc' },
-        })
+        return BorrowRepository.findOverdue()
     },
 
     async getTotalFines() {
-        const result = await prisma.fine.aggregate({
-            _sum: {
-                amount: true,
-            },
-            where: {
-                isPaid: true,
-            },
-        })
-        
-        return {
-            totalCollected: result._sum.amount || 0,
-        }
+        const totalCollected = await FineRepository.getTotalCollected()
+        return { totalCollected }
     },
 
     async getSystemHealth() {
-        try {
-            await prisma.$queryRaw`SELECT 1`;
-            return {
-                database: 'connected',
-                apiGateway: 'online',
-                notificationService: 'active',
-                timestamp: new Date().toISOString()
-            }
-        } catch (error) {
-            return {
-                database: 'disconnected',
-                apiGateway: 'online',
-                notificationService: 'degraded',
-                timestamp: new Date().toISOString()
-            }
+        const connected = await BookRepository.ping()
+        return {
+            database: connected ? 'connected' : 'disconnected',
+            apiGateway: 'online',
+            notificationService: 'active',
+            timestamp: new Date().toISOString(),
         }
     },
 
     async getDashboardStats() {
-        const now = new Date()
-        const startOfToday = new Date()
-        startOfToday.setHours(0, 0, 0, 0)
-        const endOfToday = new Date()
-        endOfToday.setHours(23, 59, 59, 999)
-
-        const [books, pendingBorrows, overdueCount, totalReturned, pendingTodayCount, unpaidFinesData, totalFinesData] = await Promise.all([
-            prisma.book.findMany({
-                select: {
-                    quantity: true,
-                    available: true
-                }
-            }),
-            prisma.borrow.count({
-                where: { status: BorrowStatus.PENDING }
-            }),
-            prisma.borrow.count({
-                where: {
-                    status: BorrowStatus.APPROVED,
-                    dueDate: { lt: now }
-                }
-            }),
-            prisma.borrow.count({
-                where: { status: BorrowStatus.RETURNED }
-            }),
-            prisma.borrow.count({
-                where: {
-                    status: BorrowStatus.APPROVED,
-                    dueDate: {
-                        gte: startOfToday,
-                        lte: endOfToday
-                    }
-                }
-            }),
-            prisma.fine.findMany({
-                where: { isPaid: false },
-                distinct: ['userId'],
-                select: { userId: true }
-            }),
-            prisma.fine.aggregate({
-                where: { isPaid: true },
-                _sum: { amount: true }
-            })
+        const [books, pendingBorrows, overdueCount, totalReturned, pendingTodayCount, unpaidFinesData, totalFinesCollected] = await Promise.all([
+            BookRepository.getAvailabilityStats(),
+            BorrowRepository.getPendingCount(),
+            BorrowRepository.getOverdueCount(),
+            BorrowRepository.getReturnedCount(),
+            BorrowRepository.getDueTodayCount(),
+            FineRepository.getUnpaidAccounts(),
+            FineRepository.getTotalCollected(),
         ])
 
         const totalVolumes = books.reduce((acc, book) => acc + book.quantity, 0)
@@ -215,7 +107,7 @@ export const AdminService = {
             totalShelved: totalReturned,
             // Fines page stats
             unpaidFinesAccounts: unpaidFinesData.length,
-            totalFinesCollected: totalFinesData._sum.amount || 0
+            totalFinesCollected,
         }
     }
 }

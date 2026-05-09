@@ -56,6 +56,14 @@ export const FineRepository = {
         })
     },
 
+    async getUnpaidAccounts(): Promise<{ userId: number }[]> {
+        return prisma.fine.findMany({
+            where: { isPaid: false },
+            distinct: ['userId'],
+            select: { userId: true },
+        })
+    },
+
     async getTotalCollected() {
         const result = await prisma.fine.aggregate({
             where: { isPaid: true },

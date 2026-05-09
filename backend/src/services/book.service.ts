@@ -1,4 +1,4 @@
-import prisma from '../db/client'
+import { BookRepository } from '../repositories/BookRepository'
 
 export const BookService = {
     async getAll(params: { search?: string, category?: string, page?: number, limit?: number }) {
@@ -20,13 +20,8 @@ export const BookService = {
         }
 
         const [books, total] = await Promise.all([
-            prisma.book.findMany({
-                where,
-                skip: (page - 1) * limit,
-                take: limit,
-                orderBy: { createdAt: 'desc' }
-            }),
-            prisma.book.count({ where })
+            BookRepository.findMany(where, { skip: (page - 1) * limit, take: limit }),
+            BookRepository.count(where)
         ])
 
         return {
@@ -62,10 +57,7 @@ export const BookService = {
             where.author = author
         }
 
-        const books = await prisma.book.findMany({
-            where,
-            orderBy: { createdAt: 'desc' }
-        })
+        const books = await BookRepository.findAll(where)
 
         const grouped = books.reduce((acc, book) => {
             const cat = book.category || 'Uncategorized'
@@ -82,30 +74,18 @@ export const BookService = {
     },
 
     async getById(id: number) {
-        return await prisma.book.findUnique({
-            where: { id }
-        })
+        return await BookRepository.findById(id)
     },
 
     async create(data: any) {
-        return await prisma.book.create({
-            data: {
-                ...data,
-                available: data.quantity // Initially available is same as total quantity
-            }
-        })
+        return await BookRepository.create(data)
     },
 
     async update(id: number, data: any) {
-        return await prisma.book.update({
-            where: { id },
-            data
-        })
+        return await BookRepository.update(id, data)
     },
 
     async delete(id: number) {
-        return await prisma.book.delete({
-            where: { id }
-        })
+        return await BookRepository.delete(id)
     }
 }

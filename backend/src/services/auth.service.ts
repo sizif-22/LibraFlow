@@ -1,6 +1,6 @@
-import prisma from '../db/client'
 import { hashPassword, comparePassword } from '../utils/password'
 import { EmailService } from './email.service'
+import { UserRepository } from '../repositories/UserRepository'
 
 // Temporary store for verification codes (in-memory)
 // In production, use Redis or a database table with TTL
@@ -10,7 +10,7 @@ const activationStore = new Map<string, { code: string, expires: number }>();
 
 export const AuthService = {
     async sendActivationCode(email: string) {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new Error('User not found');
         if (user.isVerified) throw new Error('Account is already verified');
 
@@ -34,16 +34,13 @@ export const AuthService = {
             throw new Error('Code expired');
         }
 
-        const user = await prisma.user.update({
-            where: { email },
-            data: { isVerified: true }
-        });
+        const user = await UserRepository.updateByEmail(email, { isVerified: true });
 
         activationStore.delete(email);
         return user;
     },
     async sendPasswordResetCode(email: string) {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) {
             throw new Error('No account found with this email');
         }
@@ -75,17 +72,14 @@ export const AuthService = {
 
         const hashedPassword = await hashPassword(newPassword);
         
-        await prisma.user.update({
-            where: { email },
-            data: { password: hashedPassword }
-        });
+        await UserRepository.updateByEmail(email, { password: hashedPassword });
 
         resetStore.delete(email);
         return { message: 'Password reset successful' };
     },
     async sendVerificationCode(email: string, data: any) {
         // Check if user already exists
-        const existingUser = await prisma.user.findUnique({ where: { email } });
+        const existingUser = await UserRepository.findByEmail(email);
         if (existingUser) {
             throw new Error('User with this email already exists');
         }
@@ -118,14 +112,12 @@ export const AuthService = {
         const { password, name, role } = entry.data;
         const hashedPassword = await hashPassword(password);
         
-        const user = await prisma.user.create({
-            data: {
-                email,
-                name,
-                password: hashedPassword,
-                role: role || 'STUDENT',
-                isVerified: true
-            }
+        const user = await UserRepository.create({
+            email,
+            name,
+            password: hashedPassword,
+            role: role || 'STUDENT',
+            isVerified: true,
         });
 
         // Clean up
@@ -141,23 +133,19 @@ export const AuthService = {
         // This is now legacy or used by admin
         const { email, password, name, role } = data;
         const hashedPassword = await hashPassword(password);
-        return await prisma.user.create({
-            data: {
-                email,
-                name,
-                password: hashedPassword,
-                role: role || 'STUDENT',
-                isVerified: true
-            }
+        return await UserRepository.create({
+            email,
+            name,
+            password: hashedPassword,
+            role: role || 'STUDENT',
+            isVerified: true,
         });
     },
 
     async login(data: any) {
         const { email, password } = data
         
-        const user = await prisma.user.findUnique({
-            where: { email }
-        })
+        const user = await UserRepository.findByEmailWithPassword(email)
 
         if (!user) return null
 
