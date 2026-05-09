@@ -4,6 +4,32 @@ import { NotificationService } from '../services/notification.service'
 import { Role } from '@prisma/client'
 
 export const adminController = new Elysia({ prefix: '/admin' })
+    .macro({
+        isAuth(value: boolean) {
+            return {
+                beforeHandle({ user, set }: any) {
+                    if (value && !user) {
+                        set.status = 401
+                        return { message: 'Unauthorized: You must be logged in to access this resource' }
+                    }
+                }
+            }
+        },
+        hasRole(roles: string[]) {
+            return {
+                beforeHandle({ user, set }: any) {
+                    if (!user) {
+                        set.status = 401
+                        return { message: 'Unauthorized' }
+                    }
+                    if (!roles.includes(user.role)) {
+                        set.status = 403
+                        return { message: 'Forbidden: Insufficient permissions' }
+                    }
+                }
+            }
+        }
+    })
     .get('/users', async () => {
         return await AdminService.listUsers()
     }, {

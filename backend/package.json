@@ -19,7 +19,10 @@
     "elysia": "^1.4.28"
   },
   "scripts": {
-    "dev": "bun --watch src/index.ts"
+    "dev": "bun --watch src/index.ts",
+    "build": "prisma generate",
+    "start": "bun src/index.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "bun prisma/seed.ts"

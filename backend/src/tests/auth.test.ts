@@ -1,4 +1,12 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect, mock } from 'bun:test'
+
+mock.module('../services/auth.service', () => ({
+    AuthService: {
+        register: mock(() => { throw new Error('Mock register called') }),
+        login: mock(() => null)
+    }
+}))
+
 import { Elysia } from 'elysia'
 import { authController } from '../controllers/auth.controller'
 
@@ -17,7 +25,6 @@ describe('Auth Module', () => {
                 })
             })
         )
-        
         expect(response.status).toBe(422)
     })
 
@@ -32,7 +39,6 @@ describe('Auth Module', () => {
                 })
             })
         )
-        
         expect(response.status).toBe(401)
     })
 })

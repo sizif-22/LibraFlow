@@ -3,6 +3,32 @@ import { BorrowService } from '../services/borrow.service'
 import { BorrowType } from '../types/borrow'
 
 export const borrowController = new Elysia({ prefix: '/borrows' })
+    .macro({
+        isAuth(value: boolean) {
+            return {
+                beforeHandle({ user, set }: any) {
+                    if (value && !user) {
+                        set.status = 401
+                        return { message: 'Unauthorized: You must be logged in to access this resource' }
+                    }
+                }
+            }
+        },
+        hasRole(roles: string[]) {
+            return {
+                beforeHandle({ user, set }: any) {
+                    if (!user) {
+                        set.status = 401
+                        return { message: 'Unauthorized' }
+                    }
+                    if (!roles.includes(user.role)) {
+                        set.status = 403
+                        return { message: 'Forbidden: Insufficient permissions' }
+                    }
+                }
+            }
+        }
+    })
 
     // ─────────────────────────────────────────────────────────────────────────
     // GET /api/borrows
